@@ -12,4 +12,8 @@
       <PackageReference Include="Websocket.Client" Version="4.4.43" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\QBot4Sharp\QBot4Sharp.csproj" />
+    </ItemGroup>
+
 </Project>
