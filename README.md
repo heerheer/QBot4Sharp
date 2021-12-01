@@ -12,7 +12,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`ssss`
+`Install-Package QBot4Sharp -Version 1.0.0-alpha`
 
 ### 2. 创建入口代码
 
@@ -23,7 +23,7 @@ var core = new BotCore(AppId, MyToken);
 ```
 ### 3. 监听事件
 ```c#
-core.On_AT_MESSAGE_CREATE += (core, msg) =>
+core.On_AT_MESSAGE_CREATE += (c, msg) =>
 {
     Console.WriteLine("收到消息啦");
     core.Api.ReplyMessage(msg.channel_id, new QBotMessageSend() { content = "你的意思是,"+msg.content+"吗?",msg_id = msg.id });
