@@ -17,11 +17,15 @@ namespace QBot4Sharp
         }
 
         private string getAuth() => $"Bot {_appId}.{_myToken}";
-        
-        public void ReplyMessage(string channelId,QBotMessageSend msgToSend)
+
+        public void ReplyMessage(string channelId, QBotMessageSend msgToSend)
         {
-            Console.WriteLine(msgToSend.ToString());
-            HttpUtil.PostWithAuth(urlBase+$"/channels/{channelId}/messages",msgToSend.ToString(),getAuth());
+            HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(), getAuth());
+        }
+
+        public void GetGuildInfo(string guildId)
+        {
+            var json = HttpUtil.GetWithAuth(urlBase + $"/guilds/{guildId}", getAuth());
         }
     }
 }

@@ -26,5 +26,15 @@ namespace QBot4Sharp.Utils
                 Console.WriteLine(resp.Result);
             }  
         }
+        public static string GetWithAuth(string url, string auth)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization",auth);
+                
+                var resp = client.GetAsync(url).Result.Content.ReadAsStringAsync();
+                return resp.Result;
+            }  
+        }
     }
 }

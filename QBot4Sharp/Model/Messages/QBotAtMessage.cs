@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace QBot4Sharp.Model.Messages
 {
@@ -51,9 +52,10 @@ namespace QBot4Sharp.Model.Messages
         public Author author { get; set; }
 
         /// <summary>
-        /// 频道ID
+        /// 子频道ID
         /// </summary>
-        public string channel_id { get; set; }
+        [JsonPropertyName("channel_id")]
+        public string ChannelId { get; set; }
 
         /// <summary>
         /// 消息内容
@@ -63,12 +65,14 @@ namespace QBot4Sharp.Model.Messages
         /// <summary>
         /// 频道 id
         /// </summary>
-        public string guild_id { get; set; }
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; }
 
         /// <summary>
         /// 消息 id
         /// </summary>
-        public string id { get; set; }
+        [JsonPropertyName("id")]
+        public string MsgId { get; set; }
 
         /// <summary>
         /// 消息创建者的member信息
