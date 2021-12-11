@@ -47,6 +47,7 @@ namespace QBot4Sharp
             {
                 Console.WriteLine($"{msg.Text}");
                 var msgObj = JsonSerializer.Deserialize<BotOpCodeBase>(msg.Text);
+                S2d = msgObj.CodeId;
                 if (msgObj.OpCode == 10)
                 {
                     //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息

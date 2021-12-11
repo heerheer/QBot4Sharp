@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json;
+using QBot4Sharp.Model;
 using QBot4Sharp.Model.Messages;
 using QBot4Sharp.Utils;
 
@@ -16,16 +18,19 @@ namespace QBot4Sharp
             _myToken = myToken;
         }
 
-        private string getAuth() => $"Bot {_appId}.{_myToken}";
+        private string GetAuthCode() => $"Bot {_appId}.{_myToken}";
 
-        public void ReplyMessage(string channelId, QBotMessageSend msgToSend)
+        public void SendMessage(string channelId, QBotMessageSend msgToSend)
         {
-            HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(), getAuth());
+            HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(), GetAuthCode());
         }
 
-        public void GetGuildInfo(string guildId)
+        public GuildInfo? GetGuildInfo(string guildId)
         {
-            var json = HttpUtil.GetWithAuth(urlBase + $"/guilds/{guildId}", getAuth());
+            var json = HttpUtil.GetWithAuth(urlBase + $"/guilds/{guildId}", GetAuthCode());
+            Console.WriteLine("获取Guild信息");
+            Console.WriteLine(json);
+            return JsonSerializer.Deserialize<GuildInfo>(json);
         }
     }
 }
