@@ -95,7 +95,7 @@ namespace QBot4Sharp
                     {
                         //鉴权成功
                         Console.WriteLine("鉴权成功");
-                        BotId = ((OpCode_ReadyEventContent)msgObj.EventContent).user.id;
+                        BotId = ((OpCodeReadyEventContent)msgObj.EventContent).user.id;
                         //鉴权成功后开始建立心跳包
                         StartHeartbeat();
                     }

@@ -64,5 +64,10 @@ namespace QBot4Sharp
             Console.WriteLine("获取Member信息");
             return JsonSerializer.Deserialize<MemberInfo>(json);
         }
+
+        public String GetAHorse()
+        {
+            return "我是一只不会赛马的小马";
+        }
     }
 }
