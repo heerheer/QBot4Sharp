@@ -14,7 +14,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.0.0-alpha`
+`Install-Package QBot4Sharp -Version 1.0.1-alpha`
 
 ### 2. 创建入口代码
 
