@@ -75,4 +75,4 @@ v 1.0.1 2021-12-13
 
 ## 交流
 ![](https://bbs.cf-lol.com/template/wic_random/static/logo.png)
-[插件船坞](https://bbs.cf-lol.com)
+访问[插件船坞](https://bbs.cf-lol.com)论坛，随时发现更多应用。
