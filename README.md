@@ -72,3 +72,7 @@ v 1.0.1 2021-12-13
 5. LinkMessageTemplateGenerator妄图成为Ark构造器，但是似乎赫尔没有Ark发送的力量...
 6. 增加了注释，减少了期末考试的复习时间。（土木工程施工为什么感觉好多。）
 7. 现在似乎可以在SDK里面发现一只不会赛马的小马！
+
+## 交流
+![](https://bbs.cf-lol.com/template/wic_random/static/logo.png)
+[插件船坞](https://bbs.cf-lol.com)
