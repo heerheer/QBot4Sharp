@@ -4,31 +4,8 @@ using System.Text.Json.Serialization;
 
 namespace QBot4Sharp.Model.Messages
 {
-    public class QBotAtMessage
+    public class QBotMessage
     {
-        public class Author
-        {
-            /// <summary>
-            /// 头像地址
-            /// </summary>
-            public string avatar { get; set; }
-
-            /// <summary>
-            /// 是否是Bot
-            /// </summary>
-            public bool bot { get; set; }
-
-            /// <summary>
-            /// 用户 id
-            /// </summary>
-            public string id { get; set; }
-
-            /// <summary>
-            /// 用户名
-            /// </summary>
-            public string username { get; set; }
-        }
-
         public class Member
         {
             /// <summary>
@@ -49,7 +26,8 @@ namespace QBot4Sharp.Model.Messages
         /// <summary>
         /// 消息创建者
         /// </summary>
-        public Author author { get; set; }
+        [JsonPropertyName("author")]
+        public UserInfo AuthorInfo { get; set; }
 
         /// <summary>
         /// 子频道ID
@@ -60,7 +38,8 @@ namespace QBot4Sharp.Model.Messages
         /// <summary>
         /// 消息内容
         /// </summary>
-        public string content { get; set; }
+        [JsonPropertyName("content")]
+        public string Content { get; set; }
 
         /// <summary>
         /// 频道 id
@@ -84,15 +63,34 @@ namespace QBot4Sharp.Model.Messages
         /// 消息时间戳
         /// </summary>
         public DateTime timestamp { get; set; }
-        
+
         /// <summary>
         /// 是否是@全员消息
         /// </summary>
         public bool mention_everyone { get; set; }
-        
+
         /// <summary>
         /// 消息编辑时间
         /// </summary>
         public DateTime edited_timestamp { get; set; }
+
+        /// <summary>
+        /// 创建一个基础的文本型回复消息
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public QBotMessageSend CreateReplyMessage(string content)
+        {
+            return QBotMessageSend.CreateReplyMsg(MsgId, content);
+        }
+
+        /// <summary>
+        /// 获取去掉@开头后的文本
+        /// </summary>
+        /// <returns></returns>
+        public string GetMessage(string botId)
+        {
+            return Content.Replace($"<@!{botId}>", "").Trim();
+        }
     }
 }

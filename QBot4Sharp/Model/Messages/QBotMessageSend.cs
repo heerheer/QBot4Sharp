@@ -6,9 +6,9 @@ namespace QBot4Sharp.Model.Messages
 {
     public class QBotMessageSend
     {
+        [JsonPropertyName("msg_id")] public string ReplyMsgId { get; set; }
         [JsonPropertyName("content")] public string Content { get; set; }
 
-        [JsonPropertyName("msg_id")] public string ReplyMsgId { get; set; }
 
         [JsonPropertyName("image")] public string ImageUrl { get; set; } = "";
 
@@ -17,21 +17,21 @@ namespace QBot4Sharp.Model.Messages
         /// 带了 msg_id 视为被动回复消息，否则视为主动推送消息
         /// </summary>
         [JsonPropertyName("ark")]
-        public string ArkMessage { get; set; }
+        public MessageArk ArkMessage { get; set; }
 
         public override string ToString()
         {
             return JsonSerializer.Serialize(this);
         }
-        
+
         /// <summary>
         /// 创建一个Reply的指定SendMsg
         /// </summary>
         /// <param name="replyId"></param>
         /// <param name="msg"></param>
         /// <returns></returns>
-        public static QBotMessageSend CreateReplyMsg(string replyId,string msg)
-            => new QBotMessageSend() { ReplyMsgId = replyId ,Content = msg};
+        public static QBotMessageSend CreateReplyMsg(string replyId, string msg)
+            => new QBotMessageSend() { ReplyMsgId = replyId, Content = msg };
     }
 
 
@@ -49,7 +49,24 @@ namespace QBot4Sharp.Model.Messages
             public string key { get; set; }
 
             public string value { get; set; }
-            //public object obj { get; set; }
+
+            public List<MessageArkKvObject> obj { get; set; }
+
+            public MessageArkKv(string key, string value)
+            {
+                this.key = key;
+                this.value = value;
+            }
+
+            public MessageArkKv(string key)
+            {
+                this.key = key;
+            }
+        }
+
+        public class MessageArkKvObject
+        {
+            [JsonPropertyName("obj_kv")] public List<MessageArkKv> KvList { get; set; }
         }
     }
 }

@@ -18,12 +18,22 @@ namespace QBot4Sharp
         public int S2d = 0; //保存下行消息得到的index？
         public WebsocketClient WebSocket;
         public int Heartbeat_Interval;
+        public string BotId;
 
+        /// <summary>
+        /// 用于调用API
+        /// </summary>
         public BotApi Api;
+
+        /// <summary>
+        /// 需要申请的事件
+        /// 用 | 表示同时申请
+        /// </summary>
+        public long Intents { get; set; } = 0;
 
         #region Events
 
-        public delegate void MessageEventHandler(object botCore, QBotAtMessage? message);
+        public delegate void MessageEventHandler(object botCore, QBotMessage? message);
 
         /// <summary>
         /// 收到AT消息事件。
@@ -70,7 +80,7 @@ namespace QBot4Sharp
                         try
                         {
                             On_AT_MESSAGE_CREATE.Invoke(this,
-                                JsonSerializer.Deserialize<QBotAtMessage>(
+                                JsonSerializer.Deserialize<QBotMessage>(
                                     ((JsonElement)msgObj.EventContent).ToString()
                                 )
                             );
@@ -85,6 +95,7 @@ namespace QBot4Sharp
                     {
                         //鉴权成功
                         Console.WriteLine("鉴权成功");
+                        BotId = ((OpCode_ReadyEventContent)msgObj.EventContent).user.id;
                         //鉴权成功后开始建立心跳包
                         StartHeartbeat();
                     }
@@ -94,6 +105,7 @@ namespace QBot4Sharp
                 }
             });
             WebSocket.Start();
+            Console.WriteLine("wss连接已开始");
         }
 
 
@@ -114,8 +126,8 @@ namespace QBot4Sharp
         private void SendOpCode2Identify()
         {
             //"{\"op\":2,\"d\":{\"token\":\"Bot 101985386.0wROp50baMyEt8EXWIYjkB3kdNUo4eg8\",\"intents\":1073741824,\"shard\":[0,1],\"properties\":null}}"
-            Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken)); });
-            Console.WriteLine(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken).Trim());
+            Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken, 0 | this.Intents)); });
+            //Console.WriteLine(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken).Trim());
             Console.WriteLine("发送鉴权信息...");
         }
     }

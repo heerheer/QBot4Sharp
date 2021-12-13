@@ -30,7 +30,7 @@ namespace QBot4Sharp.Model
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static string Gen_OpCode_2_Identify_Json(string appid, string token)
+        public static string Gen_OpCode_2_Identify_Json(string appid, string token,long intents)
         {
             using (var stream = new MemoryStream())
             {
