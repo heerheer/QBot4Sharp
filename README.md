@@ -64,7 +64,10 @@ core.On_AT_MESSAGE_CREATE += (c, msg) =>
 
 ## 更新历史
 
-v 1.0.1 2021-12-13
+### v1.0.2 2021-12-14
+1. 增加了Channel子频道获取API
+
+### v1.0.1 2021-12-13
 1. 增加了GuildInfo和MemberInfo获取的API
 2. 将1.0.0的Author修改为UserInfo结构
 3. 允许通过core.Intents (QBotIntents枚举类) 修改监听事件

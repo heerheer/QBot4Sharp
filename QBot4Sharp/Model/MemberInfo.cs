@@ -30,4 +30,11 @@ public class MemberInfo
     /// </summary>
     [JsonPropertyName("joined_at")]
     public DateTime JoinedAt { get; set; }
+
+    /// <summary>
+    /// 频道id
+    /// 只会在GUILD_MEMBER事件中引发
+    /// </summary>
+    [JsonPropertyName("guild_id	")]
+    public string GuildId { get; set; }
 }

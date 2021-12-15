@@ -42,6 +42,11 @@
         /// 私聊消息
         /// </summary>
         DIRECT_MESSAGE = 1 << 12,
+        
+        /// <summary>
+        /// 主题贴
+        /// </summary>
+        FORUM_EVENT =1<<28,
 
         /// <summary>
         /// 音频消息

@@ -35,10 +35,62 @@ namespace QBot4Sharp
 
         public delegate void MessageEventHandler(object botCore, QBotMessage? message);
 
+        public delegate void GuildEventHandler(object botCore, GuildInfo? message);
+
+        public delegate void GuildMemberEventHandler(object botCore, MemberInfo? message);
+
         /// <summary>
         /// 收到AT消息事件。
         /// </summary>
-        public event MessageEventHandler On_AT_MESSAGE_CREATE;
+        public event MessageEventHandler AT_MESSAGE_CREATE;
+
+
+        /// <summary>
+        /// 当机器人加入新guild时
+        /// </summary>
+        public event GuildEventHandler GUILD_CREATE;
+
+        /// <summary>
+        /// 当guild资料发生变更时
+        /// </summary>
+        public event GuildEventHandler GUILD_UPDATE;
+
+        /// <summary>
+        /// 当机器人退出guild时
+        /// </summary>
+        public event GuildEventHandler GUILD_DELETE;
+        
+        
+        /// <summary>
+        /// 当channel被创建时
+        /// </summary>
+        public event GuildEventHandler CHANNEL_CREATE;
+        /// <summary>
+        /// 当channel被更新时
+        /// </summary>
+        public event GuildEventHandler CHANNEL_UPDATE;
+        /// <summary>
+        /// 当channel被删除时
+        /// </summary>
+        public event GuildEventHandler CHANNEL_DELETE;
+
+        
+        
+        
+        /// <summary>
+        /// 新用户加入频道
+        /// </summary>
+        public event GuildMemberEventHandler GUILD_MEMBER_ADD;
+
+        /// <summary>
+        /// 当成员资料变更时
+        /// </summary>
+        public event GuildMemberEventHandler GUILD_MEMBER_UPDATE;
+
+        /// <summary>
+        /// 用户离开频道
+        /// </summary>
+        public event GuildMemberEventHandler GUILD_MEMBER_REMOVE;
 
         #endregion
 
@@ -61,7 +113,7 @@ namespace QBot4Sharp
                 if (msgObj.OpCode == 10)
                 {
                     //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息
-                    Console.WriteLine("收到初始化消息");
+                    Console.WriteLine("[Wss]收到初始化消息");
                     //获取HeartBeat间隔
                     Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
                     SendOpCode2Identify();
@@ -69,29 +121,70 @@ namespace QBot4Sharp
                 else if (msgObj.OpCode == 11)
                 {
                     //11为当发送心跳成功之后，就会收到该消息。
-                    Console.WriteLine("心跳包接触OK");
+                    Console.WriteLine("[Wss]心跳包接触OK");
                 }
                 else if (msgObj.OpCode == 0)
                 {
-                    //服务端进行消息推送
-                    if (msgObj.EventType == "AT_MESSAGE_CREATE")
+                    var eventType = msgObj.EventType;
+                    /*
+                    var eventInfo = this.GetType().GetEvent(eventType);
+                    if (eventInfo != null)
                     {
-                        Console.WriteLine("收到消息事件");
-                        try
-                        {
-                            On_AT_MESSAGE_CREATE.Invoke(this,
-                                JsonSerializer.Deserialize<QBotMessage>(
-                                    ((JsonElement)msgObj.EventContent).ToString()
-                                )
-                            );
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.Message);
-                        }
+                       var paramType = eventInfo.EventHandlerType?.GetMethod("Invoke")?.GetParameters()[1].ParameterType;
+                       eventInfo.GetRaiseMethod().Invoke(),
+                    }*/
+
+
+                    //服务端进行消息推送
+                    if (eventType == "AT_MESSAGE_CREATE")
+                    {
+                        AT_MESSAGE_CREATE.Invoke(this,
+                            JsonSerializer.Deserialize<QBotMessage>(
+                                ((JsonElement)msgObj.EventContent).ToString()
+                            )
+                        );
                     }
 
-                    if (msgObj.EventType == "READY")
+                    if (eventType is "GUILD_CREATE" or "GUILD_UPDATE" or "GUILD_DELETE")
+                    {
+                        var guildInfo =
+                            JsonSerializer.Deserialize<GuildInfo>(((JsonElement)msgObj.EventContent).ToString());
+                        switch (eventType)
+                        {
+                            case "GUILD_CREATE":
+                                GUILD_CREATE.Invoke(this, guildInfo);
+                                break;
+
+                            case "GUILD_UPDATE":
+                                GUILD_UPDATE.Invoke(this, guildInfo);
+                                break;
+
+                            case "GUILD_DELETE":
+                                GUILD_DELETE.Invoke(this, guildInfo);
+                                break;
+                        }
+                    }
+                    
+                    if (eventType.StartsWith("GUILD_MEMBER"))
+                    {
+                        var memberInfo =
+                            JsonSerializer.Deserialize<MemberInfo>(((JsonElement)msgObj.EventContent).ToString());
+                        switch (eventType)
+                        {
+                            case "GUILD_MEMBER_ADD":
+                                GUILD_MEMBER_ADD.Invoke(this, memberInfo);
+                                break;
+
+                            case "GUILD_MEMBER_UPDATE":
+                                GUILD_MEMBER_UPDATE.Invoke(this, memberInfo);
+                                break;
+
+                            case "GUILD_MEMBER_REMOVE":
+                                GUILD_MEMBER_REMOVE.Invoke(this, memberInfo);
+                                break;
+                        }
+                    }
+                    if (eventType == "READY")
                     {
                         //鉴权成功
                         Console.WriteLine("鉴权成功");
