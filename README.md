@@ -64,6 +64,11 @@ core.On_AT_MESSAGE_CREATE += (c, msg) =>
 
 ## 更新历史
 
+### v1.0.3 2021-12-15
+1. 更新了一些注释（官方文档怎么突然更新）
+2. 增加了一些可监听的event，但实际还没做（
+3. 鉴权IntentsEnum中添加了FORUM_EVENT(1<<28)？
+
 ### v1.0.2 2021-12-14
 1. 增加了Channel子频道获取API
 
