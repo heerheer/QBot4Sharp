@@ -13,7 +13,7 @@ namespace QBot4Sharp
         const string apiUrl_sandBox = "https://sandbox.api.sgroup.qq.com";
         const string wssUrl_sandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
 
-        const string apiUrl_public = "https://sandbox.api.sgroup.qq.com";
+        const string apiUrl_public = "https://api.sgroup.qq.com";
         const string wssUrl_public = "wss://api.sgroup.qq.com/websocket";
 
         string MyToken;

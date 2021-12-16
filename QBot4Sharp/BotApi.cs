@@ -35,6 +35,7 @@ namespace QBot4Sharp
         /// <param name="msgToSend"></param>
         public void SendMessage(string channelId, QBotMessageSend msgToSend)
         {
+            Console.WriteLine(urlBase);
             HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(), GetAuthCode());
         }
 
