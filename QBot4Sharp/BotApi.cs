@@ -8,15 +8,19 @@ namespace QBot4Sharp
 {
     public class BotApi
     {
-        const string urlBase = "https://sandbox.api.sgroup.qq.com";
+        private string urlBase = "https://sandbox.api.sgroup.qq.com";
+
         private string _appId;
         private string _myToken;
 
-        public BotApi(string appId, string myToken)
+        public BotApi(string appId, string myToken, bool isSandBoxMode)
         {
             _appId = appId;
             _myToken = myToken;
+
+            urlBase = isSandBoxMode ? "https://sandbox.api.sgroup.qq.com" : "https://api.sgroup.qq.com";
         }
+
 
         /// <summary>
         /// 获取拼接的Auth文本

@@ -10,8 +10,11 @@ namespace QBot4Sharp
 {
     public class BotCore
     {
-        const string apiUrl = "https://sandbox.api.sgroup.qq.com";
-        const string wssUrl = "wss://sandbox.api.sgroup.qq.com/websocket";
+        const string apiUrl_sandBox = "https://sandbox.api.sgroup.qq.com";
+        const string wssUrl_sandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
+
+        const string apiUrl_public = "https://sandbox.api.sgroup.qq.com";
+        const string wssUrl_public = "wss://api.sgroup.qq.com/websocket";
 
         string MyToken;
         string AppId;
@@ -33,11 +36,19 @@ namespace QBot4Sharp
 
         #region Events
 
+        public delegate void OriginEventHandler(BotCore core, BotOpCodeBase opCode);
+
         public delegate void MessageEventHandler(object botCore, QBotMessage? message);
 
         public delegate void GuildEventHandler(object botCore, GuildInfo? message);
 
         public delegate void GuildMemberEventHandler(object botCore, MemberInfo? message);
+
+
+        /// <summary>
+        /// OpCode为0时，服务端进行消息推送事件(未细分)
+        /// </summary>
+        public event OriginEventHandler OnDispatch;
 
         /// <summary>
         /// 收到AT消息事件。
@@ -59,24 +70,24 @@ namespace QBot4Sharp
         /// 当机器人退出guild时
         /// </summary>
         public event GuildEventHandler GUILD_DELETE;
-        
-        
+
+
         /// <summary>
         /// 当channel被创建时
         /// </summary>
         public event GuildEventHandler CHANNEL_CREATE;
+
         /// <summary>
         /// 当channel被更新时
         /// </summary>
         public event GuildEventHandler CHANNEL_UPDATE;
+
         /// <summary>
         /// 当channel被删除时
         /// </summary>
         public event GuildEventHandler CHANNEL_DELETE;
 
-        
-        
-        
+
         /// <summary>
         /// 新用户加入频道
         /// </summary>
@@ -94,11 +105,20 @@ namespace QBot4Sharp
 
         #endregion
 
-        public BotCore(string appId, string myToken)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="myToken"></param>
+        /// <param name="isSandBoxMode">是否是沙箱模式</param>
+        public BotCore(string appId, string myToken, bool isSandBoxMode = true)
         {
             AppId = appId;
             MyToken = myToken;
-            Api = new BotApi(appId, myToken);
+            Api = new BotApi(appId, myToken, isSandBoxMode);
+
+            var wssUrl = isSandBoxMode ? wssUrl_sandbox : wssUrl_public;
+
             WebSocket = new WebsocketClient(new Uri(wssUrl)); //创建ws客户端
         }
 
@@ -125,6 +145,7 @@ namespace QBot4Sharp
                 }
                 else if (msgObj.OpCode == 0)
                 {
+                    OnDispatch?.Invoke(this, msgObj);
                     var eventType = msgObj.EventType;
                     /*
                     var eventInfo = this.GetType().GetEvent(eventType);
@@ -138,7 +159,7 @@ namespace QBot4Sharp
                     //服务端进行消息推送
                     if (eventType == "AT_MESSAGE_CREATE")
                     {
-                        AT_MESSAGE_CREATE.Invoke(this,
+                        AT_MESSAGE_CREATE(this,
                             JsonSerializer.Deserialize<QBotMessage>(
                                 ((JsonElement)msgObj.EventContent).ToString()
                             )
@@ -152,19 +173,19 @@ namespace QBot4Sharp
                         switch (eventType)
                         {
                             case "GUILD_CREATE":
-                                GUILD_CREATE.Invoke(this, guildInfo);
+                                GUILD_CREATE(this, guildInfo);
                                 break;
 
                             case "GUILD_UPDATE":
-                                GUILD_UPDATE.Invoke(this, guildInfo);
+                                GUILD_UPDATE(this, guildInfo);
                                 break;
 
                             case "GUILD_DELETE":
-                                GUILD_DELETE.Invoke(this, guildInfo);
+                                GUILD_DELETE(this, guildInfo);
                                 break;
                         }
                     }
-                    
+
                     if (eventType.StartsWith("GUILD_MEMBER"))
                     {
                         var memberInfo =
@@ -184,6 +205,7 @@ namespace QBot4Sharp
                                 break;
                         }
                     }
+
                     if (eventType == "READY")
                     {
                         //鉴权成功

@@ -14,20 +14,21 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.0.2-alpha`
+`Install-Package QBot4Sharp -Version 1.0.3-alpha`
 
 ### 2. 创建入口代码
 
 ```c#
 string MyToken = "abcd";
 string AppId = "1234";
-var core = new BotCore(AppId, MyToken);
+var core = new BotCore(AppId, MyToken,false);
+//core的第三个参数代表是否开始SandBox模式，默认开启。
 ```
 
 ### 3. 监听事件
 
 ```c#
-core.On_AT_MESSAGE_CREATE += (c, msg) =>
+core.AT_MESSAGE_CREATE += (c, msg) =>
 {
     Console.WriteLine("收到消息啦");
 };
@@ -47,7 +48,7 @@ core.StartWssConnection();
 ### 5. 如何回复消息
 
 ```c#
-core.On_AT_MESSAGE_CREATE += (c, msg) =>
+core.AT_MESSAGE_CREATE += (c, msg) =>
 {
     var message = msg.GetMessage(core.BotId);//获取去掉开头<@!>的文本
     
@@ -64,10 +65,15 @@ core.On_AT_MESSAGE_CREATE += (c, msg) =>
 
 ## 更新历史
 
-### v1.0.3 2021-12-15
+
+
+### v1.0.3 2021-12-16
 1. 更新了一些注释（官方文档怎么突然更新）
 2. 增加了一些可监听的event，但实际还没做（
 3. 鉴权IntentsEnum中添加了FORUM_EVENT(1<<28)？
+4. 允许在实例化BotCore的时候选择是否为沙盒模式。
+5. 增加了OpCode未0时传递的原始事件BotCore.OnDispatch(事件参数为原始OpCode，可自行对其进行处理)
+
 
 ### v1.0.2 2021-12-14
 1. 增加了Channel子频道获取API
