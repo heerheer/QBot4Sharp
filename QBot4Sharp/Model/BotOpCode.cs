@@ -45,7 +45,7 @@ namespace QBot4Sharp.Model
                     jsonWriter.WriteString("token",
                         $"Bot {appid}.{token}");
                     //需要监听的事件
-                    jsonWriter.WriteNumber("intents", 0 | 1 << 30);
+                    jsonWriter.WriteNumber("intents", intents);
 
                     //OpCode2Identify 分片信息
                     jsonWriter.WriteStartArray("shard");

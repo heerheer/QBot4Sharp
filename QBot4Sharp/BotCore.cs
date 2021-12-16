@@ -127,96 +127,105 @@ namespace QBot4Sharp
         {
             WebSocket.MessageReceived.Subscribe(msg =>
             {
-                Console.WriteLine($"{msg.Text}");
-                var msgObj = JsonSerializer.Deserialize<BotOpCodeBase>(msg.Text);
-                S2d = msgObj.CodeId;
-                if (msgObj.OpCode == 10)
+                try
                 {
-                    //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息
-                    Console.WriteLine("[Wss]收到初始化消息");
-                    //获取HeartBeat间隔
-                    Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
-                    SendOpCode2Identify();
-                }
-                else if (msgObj.OpCode == 11)
-                {
-                    //11为当发送心跳成功之后，就会收到该消息。
-                    Console.WriteLine("[Wss]心跳包接触OK");
-                }
-                else if (msgObj.OpCode == 0)
-                {
-                    OnDispatch?.Invoke(this, msgObj);
-                    var eventType = msgObj.EventType;
-                    /*
-                    var eventInfo = this.GetType().GetEvent(eventType);
-                    if (eventInfo != null)
+                    Console.WriteLine($"{msg.Text}");
+                    var msgObj = JsonSerializer.Deserialize<BotOpCodeBase>(msg.Text);
+                    S2d = msgObj.CodeId;
+                    if (msgObj.OpCode == 10)
                     {
-                       var paramType = eventInfo.EventHandlerType?.GetMethod("Invoke")?.GetParameters()[1].ParameterType;
-                       eventInfo.GetRaiseMethod().Invoke(),
-                    }*/
-
-
-                    //服务端进行消息推送
-                    if (eventType == "AT_MESSAGE_CREATE")
-                    {
-                        AT_MESSAGE_CREATE(this,
-                            JsonSerializer.Deserialize<QBotMessage>(
-                                ((JsonElement)msgObj.EventContent).ToString()
-                            )
-                        );
+                        //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息
+                        Console.WriteLine("[Wss]收到初始化消息");
+                        //获取HeartBeat间隔
+                        Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
+                        SendOpCode2Identify();
                     }
-
-                    if (eventType is "GUILD_CREATE" or "GUILD_UPDATE" or "GUILD_DELETE")
+                    else if (msgObj.OpCode == 11)
                     {
-                        var guildInfo =
-                            JsonSerializer.Deserialize<GuildInfo>(((JsonElement)msgObj.EventContent).ToString());
-                        switch (eventType)
+                        //11为当发送心跳成功之后，就会收到该消息。
+                        Console.WriteLine("[Wss]心跳包接触OK");
+                    }
+                    else if (msgObj.OpCode == 0)
+                    {
+                        OnDispatch?.Invoke(this, msgObj);
+                        var eventType = msgObj.EventType;
+                        /*
+                        var eventInfo = this.GetType().GetEvent(eventType);
+                        if (eventInfo != null)
                         {
-                            case "GUILD_CREATE":
-                                GUILD_CREATE(this, guildInfo);
-                                break;
+                           var paramType = eventInfo.EventHandlerType?.GetMethod("Invoke")?.GetParameters()[1].ParameterType;
+                           eventInfo.GetRaiseMethod().Invoke(),
+                        }*/
 
-                            case "GUILD_UPDATE":
-                                GUILD_UPDATE(this, guildInfo);
-                                break;
 
-                            case "GUILD_DELETE":
-                                GUILD_DELETE(this, guildInfo);
-                                break;
+                        //服务端进行消息推送
+                        if (eventType == "AT_MESSAGE_CREATE")
+                        {
+                            AT_MESSAGE_CREATE(this,
+                                JsonSerializer.Deserialize<QBotMessage>(
+                                    ((JsonElement)msgObj.EventContent).ToString()
+                                )
+                            );
+                        }
+
+                        if (eventType is "GUILD_CREATE" or "GUILD_UPDATE" or "GUILD_DELETE")
+                        {
+                            var guildInfo =
+                                JsonSerializer.Deserialize<GuildInfo>(((JsonElement)msgObj.EventContent).ToString());
+                            switch (eventType)
+                            {
+                                case "GUILD_CREATE":
+                                    GUILD_CREATE(this, guildInfo);
+                                    break;
+
+                                case "GUILD_UPDATE":
+                                    GUILD_UPDATE(this, guildInfo);
+                                    break;
+
+                                case "GUILD_DELETE":
+                                    GUILD_DELETE(this, guildInfo);
+                                    break;
+                            }
+                        }
+
+                        if (eventType.StartsWith("GUILD_MEMBER"))
+                        {
+                            var memberInfo =
+                                JsonSerializer.Deserialize<MemberInfo>(((JsonElement)msgObj.EventContent).ToString());
+                            switch (eventType)
+                            {
+                                case "GUILD_MEMBER_ADD":
+                                    GUILD_MEMBER_ADD.Invoke(this, memberInfo);
+                                    break;
+
+                                case "GUILD_MEMBER_UPDATE":
+                                    GUILD_MEMBER_UPDATE.Invoke(this, memberInfo);
+                                    break;
+
+                                case "GUILD_MEMBER_REMOVE":
+                                    GUILD_MEMBER_REMOVE.Invoke(this, memberInfo);
+                                    break;
+                            }
+                        }
+
+                        if (eventType == "READY")
+                        {
+                            //鉴权成功
+                            Console.WriteLine("[Wss]鉴权成功");
+                            BotId = JsonSerializer
+                                .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString())
+                                ?.user.id ?? "";
+                            //鉴权成功后开始建立心跳包
+                            StartHeartbeat();
                         }
                     }
-
-                    if (eventType.StartsWith("GUILD_MEMBER"))
+                    else
                     {
-                        var memberInfo =
-                            JsonSerializer.Deserialize<MemberInfo>(((JsonElement)msgObj.EventContent).ToString());
-                        switch (eventType)
-                        {
-                            case "GUILD_MEMBER_ADD":
-                                GUILD_MEMBER_ADD.Invoke(this, memberInfo);
-                                break;
-
-                            case "GUILD_MEMBER_UPDATE":
-                                GUILD_MEMBER_UPDATE.Invoke(this, memberInfo);
-                                break;
-
-                            case "GUILD_MEMBER_REMOVE":
-                                GUILD_MEMBER_REMOVE.Invoke(this, memberInfo);
-                                break;
-                        }
-                    }
-
-                    if (eventType == "READY")
-                    {
-                        //鉴权成功
-                        Console.WriteLine("鉴权成功");
-                        BotId = ((OpCodeReadyEventContent)msgObj.EventContent).user.id;
-                        //鉴权成功后开始建立心跳包
-                        StartHeartbeat();
                     }
                 }
-                else
+                catch (Exception e)
                 {
+                    Console.WriteLine(e);
                 }
             });
             WebSocket.Start();
@@ -231,7 +240,7 @@ namespace QBot4Sharp
                 while (true)
                 {
                     var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
-                    Console.WriteLine("尝试发送心跳包" + text);
+                    Console.WriteLine("[Wss]尝试心跳包..." + text);
                     WebSocket?.Send(text);
                     Thread.Sleep(Heartbeat_Interval);
                 }
@@ -240,7 +249,6 @@ namespace QBot4Sharp
 
         private void SendOpCode2Identify()
         {
-            //"{\"op\":2,\"d\":{\"token\":\"Bot 101985386.0wROp50baMyEt8EXWIYjkB3kdNUo4eg8\",\"intents\":1073741824,\"shard\":[0,1],\"properties\":null}}"
             Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken, 0 | this.Intents)); });
             //Console.WriteLine(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken).Trim());
             Console.WriteLine("发送鉴权信息...");
