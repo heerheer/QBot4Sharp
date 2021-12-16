@@ -8,7 +8,7 @@ namespace QBot4Sharp
 {
     public class BotApi
     {
-        private string urlBase = "https://sandbox.api.sgroup.qq.com";
+        private string urlBase;
 
         private string _appId;
         private string _myToken;
