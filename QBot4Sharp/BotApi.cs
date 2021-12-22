@@ -48,6 +48,11 @@ namespace QBot4Sharp
             return HttpUtil.GetWithAuth(urlBase + $"/gateway", GetAuthCode());
         }
 
+        public string GetWebsocketLinkWithShard()
+        {
+            return HttpUtil.GetWithAuth(urlBase + $"/gateway/bot", GetAuthCode());
+        }
+        
         /// <summary>
         /// 获取频道信息
         /// </summary>

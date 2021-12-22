@@ -23,6 +23,13 @@ namespace QBot4Sharp
         public int Heartbeat_Interval;
         public string BotId;
 
+
+        private string session;
+
+        private bool resuming = false;
+
+        private Timer _heartbeatTimer = null;
+
         /// <summary>
         /// 用于调用API
         /// </summary>
@@ -32,7 +39,7 @@ namespace QBot4Sharp
         /// 需要申请的事件
         /// 用 | 表示同时申请
         /// </summary>
-        public long Intents { get; set; } = 0;
+        public long Intents { get; set; }
 
         #region Events
 
@@ -138,7 +145,14 @@ namespace QBot4Sharp
                         Console.WriteLine("[Wss]收到初始化消息");
                         //获取HeartBeat间隔
                         Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
-                        SendOpCode2Identify();
+                        if (session != "")
+                        {
+                            TryResume();
+                        }
+                        else
+                        {
+                            SendOpCode2Identify();
+                        }
                     }
                     else if (msgObj.OpCode == 11)
                     {
@@ -212,11 +226,32 @@ namespace QBot4Sharp
                         {
                             //鉴权成功
                             Console.WriteLine("[Wss]鉴权成功");
-                            BotId = JsonSerializer
-                                .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString())
+                            var botReadyContent = JsonSerializer
+                                .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString());
+                            BotId = botReadyContent
                                 ?.user.id ?? "";
+                            session = botReadyContent.session_id;
                             //鉴权成功后开始建立心跳包
                             StartHeartbeat();
+                        }
+
+                        if (eventType == "RESUMED")
+                        {
+                            Console.WriteLine("重连补发完成");
+                            resuming = false;
+                            StartHeartbeat();
+                        }
+                    }
+                    else if (msgObj.OpCode == 9)
+                    {
+                        if (resuming)
+                        {
+                            Console.WriteLine("Resume错误,清空session");
+                            session = "";
+                        }
+                        else
+                        {
+                            Console.WriteLine("连接:OpCode9错误...");
                         }
                     }
                     else
@@ -233,18 +268,25 @@ namespace QBot4Sharp
         }
 
 
-        private void StartHeartbeat()
+        public void StartHeartbeat()
         {
-            Task.Factory.StartNew(() =>
+            if (_heartbeatTimer != null)
             {
-                while (true)
-                {
-                    var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
-                    Console.WriteLine("[Wss]尝试心跳包..." + text);
-                    WebSocket?.Send(text);
-                    Thread.Sleep(Heartbeat_Interval);
-                }
+                _heartbeatTimer.Change(-1, 0);
+                Console.WriteLine("Timer已关闭");
+                _heartbeatTimer.Dispose();
+            }
+
+            Console.WriteLine("Timer已创建");
+
+            _heartbeatTimer = new Timer(obj =>
+            {
+                var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
+                Console.WriteLine("[Wss]发送心跳包..." + text);
+                WebSocket.Send(text);
             });
+
+            _heartbeatTimer.Change(0, Heartbeat_Interval);
         }
 
         private void SendOpCode2Identify()
@@ -252,6 +294,14 @@ namespace QBot4Sharp
             Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken, 0 | this.Intents)); });
             //Console.WriteLine(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken).Trim());
             Console.WriteLine("发送鉴权信息...");
+        }
+
+        private void TryResume()
+        {
+            if (session == "")
+                return;
+            resuming = true;
+            WebSocket.Send(new ResumeOpCode(MyToken, session).ToString());
         }
     }
 }

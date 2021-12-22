@@ -11,6 +11,36 @@ namespace QBot4Sharp.Model
         [JsonPropertyName("s")] public int CodeId { get; set; }
         [JsonPropertyName("d")] public object EventContent { get; set; } = null;
         [JsonPropertyName("t")] public string EventType { get; set; } = "";
+
+        /// <summary>
+        /// 返回JSON
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return JsonSerializer.Serialize(this);
+        }
+    }
+
+    public class ResumeOpCode : BotOpCodeBase
+    {
+        public ResumeOpCode(string token, string session)
+        {
+            OpCode = 6;
+            EventContent = new ResumeContent()
+            {
+                seq = 1377,
+                session_id = session,
+                token = token
+            };
+        }
+
+        public class ResumeContent
+        {
+            public string token { get; set; }
+            public string session_id { get; set; }
+            public int seq { get; set; }
+        }
     }
 
     public static class BotOpCode
@@ -30,7 +60,7 @@ namespace QBot4Sharp.Model
         /// </summary>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static string Gen_OpCode_2_Identify_Json(string appid, string token,long intents)
+        public static string Gen_OpCode_2_Identify_Json(string appid, string token, long intents)
         {
             using (var stream = new MemoryStream())
             {
