@@ -55,6 +55,19 @@ namespace QBot4Sharp.Model
         /// </summary>
         [JsonPropertyName("parent_id")]
         public string ParentId { get; set; }
+
+        /// <summary>
+        /// 子频道私密类型
+        /// </summary>
+        [JsonPropertyName("private_type")]
+        public ChannelPrivateType PrivateType { get; set; }
+
+        public enum ChannelPrivateType
+        {
+            Public = 0,
+            Admin = 1,
+            Special = 2,
+        }
     }
 
     /// <summary>

@@ -85,12 +85,14 @@ namespace QBot4Sharp.Model.Messages
         }
 
         /// <summary>
-        /// 获取去掉@开头后的文本
+        /// 获取去掉@开头后的文本 
         /// </summary>
         /// <returns></returns>
         public string GetMessage(string botId)
         {
-            return Content.Replace($"<@!{botId}>", "").Trim();
+            return Content.StartsWith("/")
+                ? Content.TrimStart('/').Trim().TrimEnd($"<@!{botId}>".ToCharArray()).Trim()
+                : Content.TrimStart($"<@!{botId}>".ToCharArray()).TrimStart('/').Trim();
         }
     }
 }

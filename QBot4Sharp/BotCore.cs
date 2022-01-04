@@ -157,7 +157,7 @@ namespace QBot4Sharp
                     else if (msgObj.OpCode == 11)
                     {
                         //11为当发送心跳成功之后，就会收到该消息。
-                        Console.WriteLine("[Wss]心跳包接触OK");
+                        Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}][Wss]心跳包接触OK");
                     }
                     else if (msgObj.OpCode == 0)
                     {
@@ -175,7 +175,7 @@ namespace QBot4Sharp
                         //服务端进行消息推送
                         if (eventType == "AT_MESSAGE_CREATE")
                         {
-                            AT_MESSAGE_CREATE(this,
+                            AT_MESSAGE_CREATE?.Invoke(this,
                                 JsonSerializer.Deserialize<QBotMessage>(
                                     ((JsonElement)msgObj.EventContent).ToString()
                                 )
@@ -189,15 +189,15 @@ namespace QBot4Sharp
                             switch (eventType)
                             {
                                 case "GUILD_CREATE":
-                                    GUILD_CREATE(this, guildInfo);
+                                    GUILD_CREATE?.Invoke(this, guildInfo);
                                     break;
 
                                 case "GUILD_UPDATE":
-                                    GUILD_UPDATE(this, guildInfo);
+                                    GUILD_UPDATE?.Invoke(this, guildInfo);
                                     break;
 
                                 case "GUILD_DELETE":
-                                    GUILD_DELETE(this, guildInfo);
+                                    GUILD_DELETE?.Invoke(this, guildInfo);
                                     break;
                             }
                         }
@@ -209,15 +209,15 @@ namespace QBot4Sharp
                             switch (eventType)
                             {
                                 case "GUILD_MEMBER_ADD":
-                                    GUILD_MEMBER_ADD.Invoke(this, memberInfo);
+                                    GUILD_MEMBER_ADD?.Invoke(this, memberInfo);
                                     break;
 
                                 case "GUILD_MEMBER_UPDATE":
-                                    GUILD_MEMBER_UPDATE.Invoke(this, memberInfo);
+                                    GUILD_MEMBER_UPDATE?.Invoke(this, memberInfo);
                                     break;
 
                                 case "GUILD_MEMBER_REMOVE":
-                                    GUILD_MEMBER_REMOVE.Invoke(this, memberInfo);
+                                    GUILD_MEMBER_REMOVE?.Invoke(this, memberInfo);
                                     break;
                             }
                         }
@@ -282,7 +282,7 @@ namespace QBot4Sharp
             _heartbeatTimer = new Timer(obj =>
             {
                 var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
-                Console.WriteLine("[Wss]发送心跳包..." + text);
+                Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}][Wss]发送心跳包..." + text);
                 WebSocket.Send(text);
             });
 

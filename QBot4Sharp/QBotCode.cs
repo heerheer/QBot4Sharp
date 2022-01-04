@@ -17,7 +17,7 @@
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
-        public static string SubChannelLink(string channelId) => $"<@{channelId}>";
+        public static string SubChannelLink(string channelId) => $"<#{channelId}>";
     }
 
     public enum QBotIntents
