@@ -90,9 +90,8 @@ namespace QBot4Sharp.Model.Messages
         /// <returns></returns>
         public string GetMessage(string botId)
         {
-            return Content.StartsWith("/")
-                ? Content.TrimStart('/').Trim().TrimEnd($"<@!{botId}>".ToCharArray()).Trim()
-                : Content.TrimStart($"<@!{botId}>".ToCharArray()).TrimStart('/').Trim();
+            var c = Content.Trim().TrimStart($"<@!{botId}>".ToCharArray()).Trim().TrimEnd($"<@!{botId}>".ToCharArray()).Trim();
+            return c.TrimStart('/').Trim();
         }
     }
 }

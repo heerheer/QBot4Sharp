@@ -3,7 +3,7 @@
 namespace QBot4Sharp.Model
 {
     /// <summary>
-    /// 频道信息，是频道！不是子频道。
+    /// 子频道信息。
     /// </summary>
     public class ChannelInfo
     {
