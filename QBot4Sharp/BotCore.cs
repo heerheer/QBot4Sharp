@@ -24,7 +24,7 @@ namespace QBot4Sharp
         public string BotId;
 
 
-        private string session;
+        private string session = "";
 
         private bool resuming = false;
 

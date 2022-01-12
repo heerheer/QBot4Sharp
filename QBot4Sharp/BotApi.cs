@@ -33,10 +33,12 @@ namespace QBot4Sharp
         /// </summary>
         /// <param name="channelId"></param>
         /// <param name="msgToSend"></param>
-        public void SendMessage(string channelId, QBotMessageSend msgToSend)
+        public QBotMessage? SendMessage(string channelId, QBotMessageSend msgToSend)
         {
-            Console.WriteLine(urlBase);
-            HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(), GetAuthCode());
+            var msgStr = HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(),
+                GetAuthCode());
+            Console.WriteLine(msgToSend.ToString());
+            return JsonSerializer.Deserialize<QBotMessage>(msgStr);
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace QBot4Sharp
         {
             return HttpUtil.GetWithAuth(urlBase + $"/gateway/bot", GetAuthCode());
         }
-        
+
         /// <summary>
         /// 获取频道信息
         /// </summary>
@@ -102,6 +104,33 @@ namespace QBot4Sharp
             var url = urlBase + $"/guilds/{guildId}/channels";
             var json = HttpUtil.GetWithAuth(url, GetAuthCode());
             return JsonSerializer.Deserialize<List<ChannelInfo>>(json) ?? new();
+        }
+
+        /// <summary>
+        /// 获取自己的频道列表
+        /// </summary>
+        /// <returns></returns>
+        public List<GuildInfo> GetGuildList()
+        {
+            var url = urlBase + $"/users/@me/guilds";
+            var json = HttpUtil.GetWithAuth(url, GetAuthCode());
+            return JsonSerializer.Deserialize<List<GuildInfo>>(json) ?? new();
+        }
+
+
+        public void SetChannelAnnounce(string channelId, string msgId)
+        {
+            var data = new { message_id = msgId };
+            var str = HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/announces",
+                JsonSerializer.Serialize(data), GetAuthCode());
+            Console.WriteLine(str);
+        }
+
+        public void UnsetChannelAnnounce(string channelId, string msgId)
+        {
+            var data = new { message_id = msgId };
+            HttpUtil.DeleteWithAuth(urlBase + $"/channels/{channelId}/announces/{msgId}",
+                GetAuthCode());
         }
 
         /// <summary>

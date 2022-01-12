@@ -4,6 +4,12 @@ namespace QBot4Sharp.Model.Messages;
 
 public class QBotMessageEmbed
 {
+    public QBotMessageEmbed(string title, string prompt)
+    {
+        Title = title;
+        Prompt = prompt;
+    }
+
     /// <summary>
     /// 标题
     /// </summary>
@@ -39,6 +45,11 @@ public class QBotMessageEmbed
 
     public class MessageEmbedField
     {
+        public MessageEmbedField(string name)
+        {
+            Name = name;
+        }
+
         /// <summary>
         /// 字段名
         /// </summary>
