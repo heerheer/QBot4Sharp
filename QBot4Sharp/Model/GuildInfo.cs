@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+#pragma warning disable CS8618
+
 namespace QBot4Sharp.Model
 {
     /// <summary>
@@ -10,36 +12,51 @@ namespace QBot4Sharp.Model
         /// <summary>
         /// 频道ID
         /// </summary>
-        [JsonPropertyName("id")] public string GuildId { get; set; }
+        [JsonPropertyName("id")]
+        public string GuildId { get; set; }
+
         /// <summary>
         /// Guild名称
         /// </summary>
-        [JsonPropertyName("name")] public string Name { get; set; }
+        [JsonPropertyName("name")]
+        public string Name { get; set; }
+
         /// <summary>
         /// 频道头像地址
         /// </summary>
-        [JsonPropertyName("icon")] public string IconUrl { get; set; }
-        
+        [JsonPropertyName("icon")]
+        public string IconUrl { get; set; }
+
         [JsonPropertyName("owner_id")] public string OwnerId { get; set; }
+
         /// <summary>
         /// 当前人是否是创建人
         /// </summary>
-        [JsonPropertyName("owner")] public bool UserIsOwner { get; set; }
+        [JsonPropertyName("owner")]
+        public bool UserIsOwner { get; set; }
+
         /// <summary>
         /// 成员数量
         /// </summary>
-        [JsonPropertyName("member_count")] public int MemberCount { get; set; }
+        [JsonPropertyName("member_count")]
+        public int MemberCount { get; set; }
+
         /// <summary>
         /// 最大成员数
         /// </summary>
-        [JsonPropertyName("max_members")] public int MaxMembers { get; set; }
+        [JsonPropertyName("max_members")]
+        public int MaxMembers { get; set; }
+
         /// <summary>
         /// 描述
         /// </summary>
-        [JsonPropertyName("description")] public string Description { get; set; }
+        [JsonPropertyName("description")]
+        public string Description { get; set; }
+
         /// <summary>
         /// 用户加入事件
         /// </summary>
-        [JsonPropertyName("joined_at")] public string UserJoinedTime { get; set; }
+        [JsonPropertyName("joined_at")]
+        public string UserJoinedTime { get; set; }
     }
 }

@@ -1,32 +1,33 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
 using QBot4Sharp.Model;
 using QBot4Sharp.Model.Messages;
 using Websocket.Client;
+
+#pragma warning disable CS0067
 
 namespace QBot4Sharp
 {
     public class BotCore
     {
-        const string wssUrl_sandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
+        const string WssUrlSandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
 
-        const string wssUrl_public = "wss://api.sgroup.qq.com/websocket";
+        const string WssUrlPublic = "wss://api.sgroup.qq.com/websocket";
 
         string MyToken;
+        private static bool _debug;
         string AppId;
-        public int S2d = 0; //保存下行消息得到的index？
+        public int S2d; //保存下行消息得到的index？
         public WebsocketClient WebSocket;
-        public int Heartbeat_Interval;
-        public string BotId;
+        public int HeartbeatInterval;
+
+        public string BotId = "";
 
 
-        private string session = "";
+        private string _session = "";
 
-        private bool resuming = false;
+        private bool _resuming;
 
-        private Timer _heartbeatTimer = null;
+        private Timer? _heartbeatTimer;
 
         /// <summary>
         /// 用于调用API
@@ -49,64 +50,68 @@ namespace QBot4Sharp
 
         public delegate void GuildMemberEventHandler(BotCore botCore, MemberInfo? message);
 
+        public delegate void DirectMessageHandler(BotCore botCore, QBotMessage? message);
+
 
         /// <summary>
         /// OpCode为0时，服务端进行消息推送事件(未细分)
         /// </summary>
-        public event OriginEventHandler OnDispatch;
+        public event OriginEventHandler? ON_DISPATCH;
 
         /// <summary>
         /// 收到AT消息事件。
         /// </summary>
-        public event MessageEventHandler AT_MESSAGE_CREATE;
+        public event MessageEventHandler? AT_MESSAGE_CREATE;
 
 
         /// <summary>
         /// 当机器人加入新guild时
         /// </summary>
-        public event GuildEventHandler GUILD_CREATE;
+        public event GuildEventHandler? GUILD_CREATE;
 
         /// <summary>
         /// 当guild资料发生变更时
         /// </summary>
-        public event GuildEventHandler GUILD_UPDATE;
+        public event GuildEventHandler? GUILD_UPDATE;
 
         /// <summary>
         /// 当机器人退出guild时
         /// </summary>
-        public event GuildEventHandler GUILD_DELETE;
+        public event GuildEventHandler? GUILD_DELETE;
 
 
         /// <summary>
         /// 当channel被创建时
         /// </summary>
-        public event GuildEventHandler CHANNEL_CREATE;
+        public event GuildEventHandler? CHANNEL_CREATE;
 
         /// <summary>
         /// 当channel被更新时
         /// </summary>
-        public event GuildEventHandler CHANNEL_UPDATE;
+        public event GuildEventHandler? CHANNEL_UPDATE;
 
         /// <summary>
         /// 当channel被删除时
         /// </summary>
-        public event GuildEventHandler CHANNEL_DELETE;
-
+        public event GuildEventHandler? CHANNEL_DELETE;
 
         /// <summary>
         /// 新用户加入频道
         /// </summary>
-        public event GuildMemberEventHandler GUILD_MEMBER_ADD;
+        public event GuildMemberEventHandler? GUILD_MEMBER_ADD;
 
         /// <summary>
         /// 当成员资料变更时
         /// </summary>
-        public event GuildMemberEventHandler GUILD_MEMBER_UPDATE;
+        public event GuildMemberEventHandler? GUILD_MEMBER_UPDATE;
 
         /// <summary>
         /// 用户离开频道
         /// </summary>
-        public event GuildMemberEventHandler GUILD_MEMBER_REMOVE;
+        public event GuildMemberEventHandler? GUILD_MEMBER_REMOVE;
+
+
+        public event DirectMessageHandler? DIRECT_MESSAGE;
 
         #endregion
 
@@ -116,13 +121,15 @@ namespace QBot4Sharp
         /// <param name="appId"></param>
         /// <param name="myToken"></param>
         /// <param name="isSandBoxMode">是否是沙箱模式</param>
-        public BotCore(string appId, string myToken, bool isSandBoxMode = true)
+        /// <param name="debug">是否进行debug输出</param>
+        public BotCore(string appId, string myToken, bool isSandBoxMode = true, bool debug = false)
         {
             AppId = appId;
             MyToken = myToken;
+            _debug = debug;
             Api = new BotApi(appId, myToken, isSandBoxMode);
 
-            var wssUrl = isSandBoxMode ? wssUrl_sandbox : wssUrl_public;
+            var wssUrl = isSandBoxMode ? WssUrlSandbox : WssUrlPublic;
 
             WebSocket = new WebsocketClient(new Uri(wssUrl)); //创建ws客户端
         }
@@ -141,8 +148,8 @@ namespace QBot4Sharp
                         //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息
                         DebugLog("[Wss]收到初始化消息");
                         //获取HeartBeat间隔
-                        Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
-                        if (session != "")
+                        HeartbeatInterval = BotOpCode.Get_Heartbeat_interval(msg.Text);
+                        if (_session != "")
                         {
                             TryResume();
                         }
@@ -158,7 +165,7 @@ namespace QBot4Sharp
                     }
                     else if (msgObj.OpCode == 0)
                     {
-                        OnDispatch?.Invoke(this, msgObj);
+                        ON_DISPATCH?.Invoke(this, msgObj);
                         var eventType = msgObj.EventType;
                         /*
                         var eventInfo = this.GetType().GetEvent(eventType);
@@ -168,6 +175,12 @@ namespace QBot4Sharp
                            eventInfo.GetRaiseMethod().Invoke(),
                         }*/
 
+                        if (eventType == "DIRECT_MESSAGE_CREATE")
+                        {
+                            //当收到用户发给机器人的私信消息时
+                            DIRECT_MESSAGE?.Invoke(this,
+                                JsonSerializer.Deserialize<QBotMessage>(((JsonElement)msgObj.EventContent).ToString()));
+                        }
 
                         //服务端进行消息推送
                         if (eventType == "AT_MESSAGE_CREATE")
@@ -179,6 +192,7 @@ namespace QBot4Sharp
                             );
                         }
 
+                        //Guild相关事件
                         if (eventType is "GUILD_CREATE" or "GUILD_UPDATE" or "GUILD_DELETE")
                         {
                             var guildInfo =
@@ -199,6 +213,7 @@ namespace QBot4Sharp
                             }
                         }
 
+                        //GuildMember相关事件
                         if (eventType.StartsWith("GUILD_MEMBER"))
                         {
                             var memberInfo =
@@ -227,7 +242,7 @@ namespace QBot4Sharp
                                 .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString());
                             BotId = botReadyContent
                                 ?.user.id ?? "";
-                            session = botReadyContent.session_id;
+                            _session = botReadyContent?.session_id ?? "";
                             //鉴权成功后开始建立心跳包
                             StartHeartbeat();
                             Log("鉴权完成，建立心跳包。", 1);
@@ -236,16 +251,16 @@ namespace QBot4Sharp
                         if (eventType == "RESUMED")
                         {
                             DebugLog("重连补发完成");
-                            resuming = false;
+                            _resuming = false;
                             StartHeartbeat();
                         }
                     }
                     else if (msgObj.OpCode == 9)
                     {
-                        if (resuming)
+                        if (_resuming)
                         {
                             DebugLog("Resume错误,清空session");
-                            session = "";
+                            _session = "";
                         }
                         else
                         {
@@ -274,14 +289,14 @@ namespace QBot4Sharp
             }
 
 
-            _heartbeatTimer = new Timer(obj =>
+            _heartbeatTimer = new Timer(_ =>
             {
                 var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
                 DebugLog($"[{DateTime.Now.ToShortTimeString()}][Wss]发送心跳包..." + text);
                 WebSocket.Send(text);
             });
 
-            _heartbeatTimer.Change(0, Heartbeat_Interval);
+            _heartbeatTimer.Change(0, HeartbeatInterval);
         }
 
         private void SendOpCode2Identify()
@@ -291,10 +306,10 @@ namespace QBot4Sharp
 
         private void TryResume()
         {
-            if (session == "")
+            if (_session == "")
                 return;
-            resuming = true;
-            WebSocket.Send(new ResumeOpCode(MyToken, session).ToString());
+            _resuming = true;
+            WebSocket.Send(new ResumeOpCode(MyToken, _session).ToString());
         }
 
         /// <summary>
@@ -303,12 +318,12 @@ namespace QBot4Sharp
         /// <param name="obj"></param>
         public static void DebugLog(object obj)
         {
-#if DEBUG
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine("[Debug]" + obj.ToString());
-            Console.ForegroundColor = ConsoleColor.White;
-
-#endif
+            if (_debug)
+            {
+                Console.ForegroundColor = ConsoleColor.Gray;
+                Console.WriteLine("[Debug]" + obj);
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
 

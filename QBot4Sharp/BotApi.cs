@@ -29,7 +29,7 @@ namespace QBot4Sharp
         private string GetAuthCode() => $"Bot {_appId}.{_myToken}";
 
         /// <summary>
-        /// 发送消息
+        /// 向子频道发送消息
         /// </summary>
         /// <param name="channelId"></param>
         /// <param name="msgToSend"></param>
@@ -37,7 +37,7 @@ namespace QBot4Sharp
         {
             var msgStr = HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(),
                 GetAuthCode());
-            Console.WriteLine(msgToSend.ToString());
+            BotCore.DebugLog(msgToSend.ToString());
             return JsonSerializer.Deserialize<QBotMessage>(msgStr);
         }
 
@@ -64,8 +64,8 @@ namespace QBot4Sharp
         {
             var url = urlBase + $"/guilds/{guildId}";
             var json = HttpUtil.GetWithAuth(url, GetAuthCode());
-            Console.WriteLine("获取Guild信息");
-            Console.WriteLine(json);
+            BotCore.DebugLog("获取Guild信息");
+            BotCore.DebugLog(json);
             return JsonSerializer.Deserialize<GuildInfo>(json);
         }
 
@@ -118,19 +118,51 @@ namespace QBot4Sharp
         }
 
 
+        /// <summary>
+        /// 设置子频道公告
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="msgId"></param>
         public void SetChannelAnnounce(string channelId, string msgId)
         {
             var data = new { message_id = msgId };
             var str = HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/announces",
                 JsonSerializer.Serialize(data), GetAuthCode());
-            Console.WriteLine(str);
+            BotCore.DebugLog(str);
         }
 
+        /// <summary>
+        /// 取消子频道公告
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="msgId"></param>
         public void UnsetChannelAnnounce(string channelId, string msgId)
         {
             var data = new { message_id = msgId };
             HttpUtil.DeleteWithAuth(urlBase + $"/channels/{channelId}/announces/{msgId}",
                 GetAuthCode());
+        }
+
+
+        /// <summary>
+        /// 用于机器人和在同一个频道内的成员创建私信会话。
+        /// </summary>
+        /// <param name="recipientId">接收者 id</param>
+        /// <param name="sourceGuildId">源频道 id</param>
+        /// <returns>包含频道ID，用户ID和创建时间的私信会话对象。</returns>
+        public QBotDms? CreateDms(string recipientId, string sourceGuildId)
+        {
+            var data = new { recipient_id = recipientId, source_guild_id = sourceGuildId };
+            return JsonSerializer.Deserialize<QBotDms>(HttpUtil.PostWithAuth(urlBase + $"/users/@me/dms",
+                JsonSerializer.Serialize(data),
+                GetAuthCode()));
+        }
+
+        public QBotDms? SendPrivateMessage(string guildId, QBotMessageSend messageSend)
+        {
+            return JsonSerializer.Deserialize<QBotDms>(HttpUtil.PostWithAuth(urlBase + $"/dms/{guildId}/messages",
+                JsonSerializer.Serialize(messageSend),
+                GetAuthCode()));
         }
 
         /// <summary>

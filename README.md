@@ -14,7 +14,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp`
+`Install-Package QBot4Sharp -Version 1.1.0`
 
 ### 2. 创建入口代码
 
@@ -94,7 +94,12 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 ## 更新历史
 
-### v1.0.4.7-alpha
+### v1.1.1
+
+1. 优化鉴权时事件监听策略
+2. 新增私信事件与相关API,Model.
+
+### v1.1.0
 
 1. BotCore类新增Static函数 Log & DebugLog，用于在DEBUG与RELEASE模式下输出日志。
 2. 新增LargeArk模板与TextThumbnailArk模板。
