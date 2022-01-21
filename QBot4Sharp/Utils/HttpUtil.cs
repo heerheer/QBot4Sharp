@@ -25,7 +25,6 @@ namespace QBot4Sharp.Utils
                 client.DefaultRequestHeaders.Add("Authorization", auth);
 
                 var resp = client.PostAsync(url, c).Result.Content.ReadAsStringAsync();
-                Console.WriteLine(resp.Result);
                 return resp.Result;
             }
         }

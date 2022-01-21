@@ -10,10 +10,8 @@ namespace QBot4Sharp
 {
     public class BotCore
     {
-        const string apiUrl_sandBox = "https://sandbox.api.sgroup.qq.com";
         const string wssUrl_sandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
 
-        const string apiUrl_public = "https://api.sgroup.qq.com";
         const string wssUrl_public = "wss://api.sgroup.qq.com/websocket";
 
         string MyToken;
@@ -45,11 +43,11 @@ namespace QBot4Sharp
 
         public delegate void OriginEventHandler(BotCore core, BotOpCodeBase opCode);
 
-        public delegate void MessageEventHandler(object botCore, QBotMessage? message);
+        public delegate void MessageEventHandler(BotCore botCore, QBotMessage? message);
 
-        public delegate void GuildEventHandler(object botCore, GuildInfo? message);
+        public delegate void GuildEventHandler(BotCore botCore, GuildInfo? message);
 
-        public delegate void GuildMemberEventHandler(object botCore, MemberInfo? message);
+        public delegate void GuildMemberEventHandler(BotCore botCore, MemberInfo? message);
 
 
         /// <summary>
@@ -136,13 +134,12 @@ namespace QBot4Sharp
             {
                 try
                 {
-                    Console.WriteLine($"{msg.Text}");
-                    var msgObj = JsonSerializer.Deserialize<BotOpCodeBase>(msg.Text);
+                    var msgObj = JsonSerializer.Deserialize<BotOpCodeBase>(msg.Text) ?? new();
                     S2d = msgObj.CodeId;
                     if (msgObj.OpCode == 10)
                     {
                         //Code为10是当客户端与网关建立ws连接之后，网关下发的第一条消息
-                        Console.WriteLine("[Wss]收到初始化消息");
+                        DebugLog("[Wss]收到初始化消息");
                         //获取HeartBeat间隔
                         Heartbeat_Interval = BotOpCode.Get_Heartbeat_interval(msg.Text);
                         if (session != "")
@@ -157,11 +154,11 @@ namespace QBot4Sharp
                     else if (msgObj.OpCode == 11)
                     {
                         //11为当发送心跳成功之后，就会收到该消息。
-                        Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}][Wss]心跳包接触OK");
+                        DebugLog($"[{DateTime.Now.ToShortTimeString()}][Wss]心跳包接触OK");
                     }
                     else if (msgObj.OpCode == 0)
                     {
-                        OnDispatch?.Invoke(this, msgObj);
+                        OnDispatch(this, msgObj);
                         var eventType = msgObj.EventType;
                         /*
                         var eventInfo = this.GetType().GetEvent(eventType);
@@ -225,7 +222,7 @@ namespace QBot4Sharp
                         if (eventType == "READY")
                         {
                             //鉴权成功
-                            Console.WriteLine("[Wss]鉴权成功");
+                            DebugLog("[Wss]鉴权成功");
                             var botReadyContent = JsonSerializer
                                 .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString());
                             BotId = botReadyContent
@@ -233,6 +230,7 @@ namespace QBot4Sharp
                             session = botReadyContent.session_id;
                             //鉴权成功后开始建立心跳包
                             StartHeartbeat();
+                            Log("鉴权完成，建立心跳包。", 1);
                         }
 
                         if (eventType == "RESUMED")
@@ -251,7 +249,7 @@ namespace QBot4Sharp
                         }
                         else
                         {
-                            Console.WriteLine("连接:OpCode9错误...");
+                            Log("连接:OpCode9错误...", 3);
                         }
                     }
                     else
@@ -260,11 +258,10 @@ namespace QBot4Sharp
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Log(e, 3);
                 }
             });
             WebSocket.Start();
-            Console.WriteLine("wss连接已开始");
         }
 
 
@@ -273,16 +270,14 @@ namespace QBot4Sharp
             if (_heartbeatTimer != null)
             {
                 _heartbeatTimer.Change(-1, 0);
-                Console.WriteLine("Timer已关闭");
                 _heartbeatTimer.Dispose();
             }
 
-            Console.WriteLine("Timer已创建");
 
             _heartbeatTimer = new Timer(obj =>
             {
                 var text = BotOpCode.Gen_OpCode_Heartbeat_Json(S2d);
-                Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}][Wss]发送心跳包..." + text);
+                DebugLog($"[{DateTime.Now.ToShortTimeString()}][Wss]发送心跳包..." + text);
                 WebSocket.Send(text);
             });
 
@@ -292,8 +287,6 @@ namespace QBot4Sharp
         private void SendOpCode2Identify()
         {
             Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken, 0 | this.Intents)); });
-            //Console.WriteLine(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken).Trim());
-            Console.WriteLine("发送鉴权信息...");
         }
 
         private void TryResume()
@@ -302,6 +295,39 @@ namespace QBot4Sharp
                 return;
             resuming = true;
             WebSocket.Send(new ResumeOpCode(MyToken, session).ToString());
+        }
+
+        /// <summary>
+        /// Release模式下不会输出
+        /// </summary>
+        /// <param name="obj"></param>
+        public static void DebugLog(object obj)
+        {
+#if DEBUG
+            Console.WriteLine(obj.ToString());
+#endif
+        }
+
+
+        /// <summary>
+        /// 输出日志
+        /// </summary>
+        /// <param name="obj"> 0 正常输出 1 提示信息 2 警告 3 异常 4 错误 </param>
+        /// <param name="logType"></param>
+        public static void Log(object obj, int logType = 0)
+        {
+            Console.ForegroundColor = logType switch
+            {
+                1 => ConsoleColor.Green,
+                2 => ConsoleColor.Yellow,
+                3 => ConsoleColor.Magenta,
+                4 => ConsoleColor.Red,
+                _ => Console.ForegroundColor
+            };
+
+            Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}]{obj}");
+
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }

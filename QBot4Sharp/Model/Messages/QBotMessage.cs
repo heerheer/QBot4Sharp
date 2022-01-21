@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+using QBot4Sharp.ArkGenerator;
+
+#pragma warning disable CS8618
+
 
 namespace QBot4Sharp.Model.Messages
 {
@@ -11,7 +16,8 @@ namespace QBot4Sharp.Model.Messages
             /// <summary>
             /// 用户加入频道的时间
             /// </summary>
-            public DateTime joined_at { get; set; }
+            [JsonPropertyName("joined_at")]
+            public DateTime JoinTime { get; set; }
 
             /// <summary>
             /// 用户在频道内的身份组ID, 默认值可参考
@@ -20,7 +26,8 @@ namespace QBot4Sharp.Model.Messages
             ///4	群主/创建者
             ///5	子频道管理员
             /// </summary>
-            public List<string> roles { get; set; }
+            [JsonPropertyName("roles")]
+            public List<string> Roles { get; set; }
         }
 
         /// <summary>
@@ -57,22 +64,26 @@ namespace QBot4Sharp.Model.Messages
         /// 消息创建者的member信息
         /// </summary>
         /// <returns></returns>
-        public Member member { get; set; }
+        [JsonPropertyName("member")]
+        public Member MemberInfo { get; set; }
 
         /// <summary>
         /// 消息时间戳
         /// </summary>
-        public DateTime timestamp { get; set; }
+        [JsonPropertyName("timestamp")]
+        public DateTime Timestamp { get; set; }
 
         /// <summary>
         /// 是否是@全员消息
         /// </summary>
-        public bool mention_everyone { get; set; }
+        [JsonPropertyName("mention_everyone")]
+        public bool IsMentionEveryone { get; set; }
 
         /// <summary>
         /// 消息编辑时间
         /// </summary>
-        public DateTime edited_timestamp { get; set; }
+        [JsonPropertyName("edited_timestamp")]
+        public DateTime EditTime { get; set; }
 
         /// <summary>
         /// 创建一个基础的文本型回复消息
@@ -85,12 +96,41 @@ namespace QBot4Sharp.Model.Messages
         }
 
         /// <summary>
+        /// 用Ark填充，生成回复消息
+        /// </summary>
+        /// <param name="ark"></param>
+        /// <returns></returns>
+        public QBotMessageSend CreateReplyMessage(MessageArk ark)
+        {
+            var m = QBotMessageSend.CreateReplyMsg(MsgId, "");
+            m.ArkMessage = ark;
+            return m;
+        }
+
+        /// <summary>
+        /// 用ArkGenerator填充，生成回复消息
+        /// </summary>
+        /// <param name="arkg">Ark生成器</param>
+        /// <returns></returns>
+        public QBotMessageSend CreateReplyMessage(IArkGenerator arkg)
+        {
+            var m = QBotMessageSend.CreateReplyMsg(MsgId, "");
+            m.ArkMessage = arkg.GetArkMessage();
+            return m;
+        }
+
+        /// <summary>
         /// 获取去掉@开头后的文本 
         /// </summary>
         /// <returns></returns>
         public string GetMessage(string botId)
         {
-            var c = Content.Trim().TrimStart($"<@!{botId}>".ToCharArray()).Trim().TrimEnd($"<@!{botId}>".ToCharArray()).Trim();
+            Content = Content.Replace($"<@!{botId}>", "");
+            Regex replaceSpace = new Regex(@"\s{1,}", RegexOptions.IgnoreCase);
+
+            Content = replaceSpace.Replace(Content, " ").Trim();
+            var c = Content.Trim().TrimStart($"<@!{botId}>".ToCharArray()).Trim().TrimEnd($"<@!{botId}>".ToCharArray())
+                .Trim();
             return c.TrimStart('/').Trim();
         }
     }
