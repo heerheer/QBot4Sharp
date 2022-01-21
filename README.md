@@ -14,7 +14,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.1.0`
+`Install-Package QBot4Sharp -Version 1.1.1`
 
 ### 2. 创建入口代码
 
@@ -33,10 +33,10 @@ core.AT_MESSAGE_CREATE += (c, msg) =>
     Console.WriteLine("收到消息啦");
 };
 
-core.Intents = (long)QBotIntents.AT_MESSAGES;
+//修改IntentsConfig确定鉴权时发送的事件监听需求。
+core.IntentsConfig = new() { AtMessagesEvent = true };
 
-//监听多个事件请使用 或(|) 运算
-//core.Intents = (long)QBotIntents.AT_MESSAGES |(long)QBotIntents.GUILDS;
+//同时可以直接core.IntentsConfig.对应属性 = true; 来确定需要监听什么事件。
 ```
 
 ### 4. 启动Wss连接
@@ -96,8 +96,9 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 ### v1.1.1
 
-1. 优化鉴权时事件监听策略
+1. 优化鉴权时事件监听策略IntentsConfig
 2. 新增私信事件与相关API,Model.
+3. QBotMessage对象新增一个CreateReplyMessage重载方法，可快速创建Embed模板消息。
 
 ### v1.1.0
 

@@ -96,6 +96,22 @@ namespace QBot4Sharp.Model.Messages
         }
 
         /// <summary>
+        /// 创建Embed模板回复消息
+        /// </summary>
+        /// <param name="title">标题</param>
+        /// <param name="prompt">提示消息</param>
+        /// <param name="content">内容文本</param>
+        /// <param name="thumbnailUrl">缩略图Url</param>
+        /// <returns></returns>
+        public QBotMessageSend CreateReplyMessage(string title, string prompt, string content, string thumbnailUrl = "")
+        {
+            var a = QBotMessageSend.CreateReplyMsg(MsgId, "");
+            a.EmbedMessage = new QBotMessageEmbed(title, prompt);
+            a.EmbedMessage.Field = new List<QBotMessageEmbed.MessageEmbedField> { new(content) };
+            return a;
+        }
+
+        /// <summary>
         /// 用Ark填充，生成回复消息
         /// </summary>
         /// <param name="ark"></param>
