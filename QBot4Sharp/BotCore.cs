@@ -158,7 +158,7 @@ namespace QBot4Sharp
                     }
                     else if (msgObj.OpCode == 0)
                     {
-                        OnDispatch(this, msgObj);
+                        OnDispatch?.Invoke(this, msgObj);
                         var eventType = msgObj.EventType;
                         /*
                         var eventInfo = this.GetType().GetEvent(eventType);
@@ -235,7 +235,7 @@ namespace QBot4Sharp
 
                         if (eventType == "RESUMED")
                         {
-                            Console.WriteLine("重连补发完成");
+                            DebugLog("重连补发完成");
                             resuming = false;
                             StartHeartbeat();
                         }
@@ -244,7 +244,7 @@ namespace QBot4Sharp
                     {
                         if (resuming)
                         {
-                            Console.WriteLine("Resume错误,清空session");
+                            DebugLog("Resume错误,清空session");
                             session = "";
                         }
                         else
@@ -304,7 +304,10 @@ namespace QBot4Sharp
         public static void DebugLog(object obj)
         {
 #if DEBUG
-            Console.WriteLine(obj.ToString());
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine("[Debug]" + obj.ToString());
+            Console.ForegroundColor = ConsoleColor.White;
+
 #endif
         }
 
