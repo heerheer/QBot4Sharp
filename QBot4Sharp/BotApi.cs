@@ -28,6 +28,17 @@ namespace QBot4Sharp
         /// <returns></returns>
         private string GetAuthCode() => $"Bot {_appId}.{_myToken}";
 
+
+        /// <summary>
+        /// 用于获取当前用户（机器人）详情。
+        /// </summary>
+        /// <returns></returns>
+        public UserInfo? GetMe()
+        {
+            return JsonSerializer.Deserialize<UserInfo>(HttpUtil.GetWithAuth(urlBase + $"/user/@me", GetAuthCode()));
+        }
+
+
         /// <summary>
         /// 向子频道发送消息
         /// </summary>
@@ -50,6 +61,10 @@ namespace QBot4Sharp
             return HttpUtil.GetWithAuth(urlBase + $"/gateway", GetAuthCode());
         }
 
+        /// <summary>
+        /// 获取分片Url
+        /// </summary>
+        /// <returns></returns>
         public string GetWebsocketLinkWithShard()
         {
             return HttpUtil.GetWithAuth(urlBase + $"/gateway/bot", GetAuthCode());
@@ -110,13 +125,51 @@ namespace QBot4Sharp
         /// 获取自己的频道列表
         /// </summary>
         /// <returns></returns>
-        public List<GuildInfo> GetGuildList()
+        public List<GuildInfo> GetGuildList(string before = "", string after = "", int limit = 100)
         {
-            var url = urlBase + $"/users/@me/guilds";
-            var json = HttpUtil.GetWithAuth(url, GetAuthCode());
-            return JsonSerializer.Deserialize<List<GuildInfo>>(json) ?? new();
+            return GetGuildListAsync(before, after, limit).Result;
         }
 
+
+        private async Task<List<GuildInfo>> GetGuildListAsync(string before = "", string after = "", int limit = 100)
+        {
+            var url = urlBase + $"/users/@me/guilds?" +
+                      $"{(before != "" ? "before=" + before + "&" : "")}" +
+                      $"{(after != "" ? "after=" + after + "&" : "")}" +
+                      $"limit={limit}";
+
+            var json = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            return await JsonSerializer.DeserializeAsync<List<GuildInfo>>(json) ?? new();
+        }
+
+        /// <summary>
+        /// 直接获取所有GuildInfo
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<GuildInfo>> GetAllGuildListAsync()
+        {
+            var end = false;
+            List<GuildInfo> list = new();
+            var after = "";
+            while (!end)
+            {
+                var l = await GetGuildListAsync("", after);
+
+                if (l.Exists(x => list.Contains(x)))
+                {
+                    break;
+                }
+
+                if (l.Count != 100)
+                    end = true;
+
+
+                list.AddRange(l);
+                after = l.Last().GuildId;
+            }
+
+            return list;
+        }
 
         /// <summary>
         /// 设置子频道公告

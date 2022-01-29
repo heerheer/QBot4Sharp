@@ -93,6 +93,11 @@ public class BotCore
     /// </summary>
     public IntentsConfig IntentsConfig { get; set; } = new();
 
+    /// <summary>
+    /// Websocket状态
+    /// </summary>
+    public bool Connected { get; set; } = false;
+
     #region Events
 
     public delegate void OriginEventHandler(BotCore core, BotOpCodeBase opCode);
@@ -190,6 +195,7 @@ public class BotCore
 
     public void StartWssConnection()
     {
+        WebSocket.DisconnectionHappened.Subscribe(x => { Connected = false; });
         WebSocket.MessageReceived.Subscribe(msg =>
         {
             try
@@ -330,6 +336,7 @@ public class BotCore
             }
         });
         WebSocket.Start();
+        Connected = true;
     }
 
 

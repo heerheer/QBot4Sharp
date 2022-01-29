@@ -94,6 +94,11 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 ## 更新历史
 
+### v1.1.2
+
+1. 新增API GetAllGuildListAsync 以获取全部的频道列表。
+2. 异步化工程进行中.JPG
+
 ### v1.1.1
 
 1. 优化鉴权时事件监听策略IntentsConfig
