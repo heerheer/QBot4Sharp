@@ -98,6 +98,7 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 1. 新增API GetAllGuildListAsync 以获取全部的频道列表。
 2. 异步化工程进行中.JPG
+3. 获取频道可用权限列表API
 
 ### v1.1.1
 

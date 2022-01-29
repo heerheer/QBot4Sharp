@@ -219,12 +219,34 @@ namespace QBot4Sharp
         }
 
         /// <summary>
+        /// 获取频道可用权限列表
+        /// GET /guilds/{guild_id}/api_permission
+        /// </summary>
+        /// <param name="guildId"></param>
+        /// <returns></returns>
+        public async Task<List<ApiPermission>?> GetGuildPermissions(string guildId)
+        {
+            //GET /guilds/{guild_id}/api_permission
+            var url = urlBase + $"/guilds/{guildId}/api_permission";
+
+            var jsonStream = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var t = new { apis = new List<ApiPermission>() };
+            var data = await JsonSerializer.DeserializeAsync<GetGuildPermissionsObj>(jsonStream);
+            return data?.apis;
+        }
+
+        /// <summary>
         /// 获取一只小马。
         /// </summary>
         /// <returns>彩蛋？</returns>
         public String GetAHorse()
         {
             return "我是一只不会赛马的小马";
+        }
+
+        class GetGuildPermissionsObj
+        {
+            public List<ApiPermission>? apis { get; set; }
         }
     }
 }
