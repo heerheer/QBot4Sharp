@@ -5,7 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageVersion>1.1.2</PackageVersion>
+        <PackageVersion>1.1.2.2</PackageVersion>
         <Title>QBot4Sharp</Title>
         <Authors>Heer Kaisair</Authors>
         <Description>A QBot SDK for .Net Developer</Description>

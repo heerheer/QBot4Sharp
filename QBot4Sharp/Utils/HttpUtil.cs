@@ -9,6 +9,8 @@ namespace QBot4Sharp.Utils
 {
     public class HttpUtil
     {
+        public record OpenApiResult(string RespJson, string? TraceId);
+
         public static void Post(string url, string json)
         {
             using (var client = new HttpClient())
@@ -25,6 +27,7 @@ namespace QBot4Sharp.Utils
                 client.DefaultRequestHeaders.Add("Authorization", auth);
 
                 var resp = client.PostAsync(url, c).Result.Content.ReadAsStringAsync();
+                //BotCore.DebugLog(resp.Result);
                 return resp.Result;
             }
         }
@@ -59,6 +62,22 @@ namespace QBot4Sharp.Utils
 
                 var resp = client.GetAsync(url).Result.Content.ReadAsStreamAsync();
                 return resp;
+            }
+        }
+
+        public async static Task<OpenApiResult> PostWithAuthAsync(string url, string json, string auth)
+        {
+            using (var client = new HttpClient())
+            {
+                var c = new StringContent(json, Encoding.UTF8, "application/json");
+                client.DefaultRequestHeaders.Add("Authorization", auth);
+
+                var resp = await client.PostAsync(url, c);
+
+
+                //BotCore.DebugLog(resp.Result);
+                return new(await resp.Content.ReadAsStringAsync(),
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault());
             }
         }
     }

@@ -94,6 +94,14 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 ## 更新历史
 
+### v1.1.2.2
+
+1. 添加 SendMessageAsync 方法，异步发送消息，同时可以获取 TraceId
+
+### v1.1.2.1
+
+1. 修复DMS对象无法set(JSON反序列化失败)的问题。
+
 ### v1.1.2
 
 1. 新增API GetAllGuildListAsync 以获取全部的频道列表。

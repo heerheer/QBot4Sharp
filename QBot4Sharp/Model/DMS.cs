@@ -10,7 +10,7 @@ namespace QBot4Sharp.Model;
 /// </summary>
 public class QBotDms
 {
-    [JsonPropertyName("guild_id")] public string GuildId { get; }
-    [JsonPropertyName("channel_id")] public string ChannelId { get; }
-    [JsonPropertyName("create_time")] public string CreateTime { get; }
+    [JsonPropertyName("guild_id")] public string GuildId { get; set; }
+    [JsonPropertyName("channel_id")] public string ChannelId { get; set; }
+    [JsonPropertyName("create_time")] public string CreateTime { get; set; }
 }

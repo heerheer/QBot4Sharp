@@ -6,6 +6,8 @@ using QBot4Sharp.Utils;
 
 namespace QBot4Sharp
 {
+    public record BotApiResult<T>(string? TraceId, T? Data);
+
     public class BotApi
     {
         private string urlBase;
@@ -51,6 +53,17 @@ namespace QBot4Sharp
             BotCore.DebugLog(msgToSend.ToString());
             return JsonSerializer.Deserialize<QBotMessage>(msgStr);
         }
+
+        public async Task<BotApiResult<QBotMessage>?> SendMessageAsync(string channelId, QBotMessageSend msgToSend)
+        {
+            var res = await HttpUtil.PostWithAuthAsync(urlBase + $"/channels/{channelId}/messages",
+                msgToSend.ToString(),
+                GetAuthCode());
+            BotCore.DebugLog(msgToSend.ToString());
+            BotCore.DebugLog($"TraceId:{res.TraceId}");
+            return new(res.TraceId, JsonSerializer.Deserialize<QBotMessage>(res.RespJson));
+        }
+
 
         /// <summary>
         /// 获取WSS Url(普通模式)
@@ -191,7 +204,7 @@ namespace QBot4Sharp
         /// <param name="msgId"></param>
         public void UnsetChannelAnnounce(string channelId, string msgId)
         {
-            var data = new { message_id = msgId };
+            //var data = new { message_id = msgId };
             HttpUtil.DeleteWithAuth(urlBase + $"/channels/{channelId}/announces/{msgId}",
                 GetAuthCode());
         }
@@ -211,9 +224,9 @@ namespace QBot4Sharp
                 GetAuthCode()));
         }
 
-        public QBotDms? SendPrivateMessage(string guildId, QBotMessageSend messageSend)
+        public QBotMessage? SendPrivateMessage(string guildId, QBotMessageSend messageSend)
         {
-            return JsonSerializer.Deserialize<QBotDms>(HttpUtil.PostWithAuth(urlBase + $"/dms/{guildId}/messages",
+            return JsonSerializer.Deserialize<QBotMessage>(HttpUtil.PostWithAuth(urlBase + $"/dms/{guildId}/messages",
                 JsonSerializer.Serialize(messageSend),
                 GetAuthCode()));
         }
@@ -230,7 +243,7 @@ namespace QBot4Sharp
             var url = urlBase + $"/guilds/{guildId}/api_permission";
 
             var jsonStream = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
-            var t = new { apis = new List<ApiPermission>() };
+            //var t = new { apis = new List<ApiPermission>() };
             var data = await JsonSerializer.DeserializeAsync<GetGuildPermissionsObj>(jsonStream);
             return data?.apis;
         }
