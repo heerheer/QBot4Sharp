@@ -40,3 +40,13 @@ public class MemberInfo
     [JsonPropertyName("guild_id	")]
     public string GuildId { get; set; }
 }
+
+public class MemberInfoWithGildId : MemberInfo
+{
+    /// <summary>
+    /// 频道id
+    /// 只会在GUILD_MEMBER事件中引发
+    /// </summary>
+    [JsonPropertyName("guild_id	")]
+    public string GuildId { get; set; }
+}

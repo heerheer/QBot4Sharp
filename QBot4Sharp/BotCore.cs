@@ -106,7 +106,7 @@ public class BotCore
 
     public delegate void GuildEventHandler(BotCore botCore, GuildInfo? message);
 
-    public delegate void GuildMemberEventHandler(BotCore botCore, MemberInfo? message);
+    public delegate void GuildMemberEventHandler(BotCore botCore, MemberInfoWithGildId? message);
 
     public delegate void DirectMessageHandler(BotCore botCore, QBotMessage? message);
 
@@ -276,7 +276,8 @@ public class BotCore
                     if (eventType.StartsWith("GUILD_MEMBER"))
                     {
                         var memberInfo =
-                            JsonSerializer.Deserialize<MemberInfo>(((JsonElement)msgObj.EventContent).ToString());
+                            JsonSerializer.Deserialize<MemberInfoWithGildId>(
+                                ((JsonElement)msgObj.EventContent).ToString());
                         switch (eventType)
                         {
                             case "GUILD_MEMBER_ADD":
