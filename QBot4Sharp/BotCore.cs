@@ -301,8 +301,8 @@ public class BotCore
                         var botReadyContent = JsonSerializer
                             .Deserialize<OpCodeReadyEventContent>(((JsonElement)msgObj.EventContent).ToString());
                         BotId = botReadyContent
-                            ?.user.id ?? "";
-                        _session = botReadyContent?.session_id ?? "";
+                            ?.User.id ?? "";
+                        _session = botReadyContent?.SessionId ?? "";
                         //鉴权成功后开始建立心跳包
                         StartHeartbeat();
                         Log("鉴权完成，建立心跳包。", 1);

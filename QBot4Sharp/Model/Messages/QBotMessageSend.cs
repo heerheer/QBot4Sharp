@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace QBot4Sharp.Model.Messages
 {
     public class QBotMessageSend
     {
-        [JsonPropertyName("msg_id")] public string ReplyMsgId { get; set; }
-        [JsonPropertyName("content")] public string Content { get; set; }
+        [JsonPropertyName("msg_id")] public string? ReplyMsgId { get; set; }
+        [JsonPropertyName("content")] public string? Content { get; set; }
 
 
         [JsonPropertyName("image")] public string ImageUrl { get; set; } = "";
@@ -17,9 +18,9 @@ namespace QBot4Sharp.Model.Messages
         /// 带了 msg_id 视为被动回复消息，否则视为主动推送消息
         /// </summary>
         [JsonPropertyName("ark")]
-        public MessageArk ArkMessage { get; set; }
+        public MessageArk? ArkMessage { get; set; }
 
-        [JsonPropertyName("embed")] public MessageEmbed EmbedMessage { get; set; }
+        [JsonPropertyName("embed")] public MessageEmbed? EmbedMessage { get; set; }
 
         public override string ToString()
         {

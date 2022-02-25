@@ -1,4 +1,5 @@
 # QBot4Sharp
+![](logo.png)
 
 A QBot SDK for .Net Developer
 

@@ -1,11 +1,16 @@
-﻿namespace QBot4Sharp.Model;
+﻿using System.Text.Json.Serialization;
+
+// ReSharper disable All
+#pragma warning disable CS8618
+
+namespace QBot4Sharp.Model;
 
 public class OpCodeReadyEventContent
 {
-    public int version { get; set; }
-    public string session_id { get; set; }
-    public OpCodeReadyEventUser user { get; set; }
-    public List<int> shard { get; set; }
+    [JsonPropertyName("version")] public int Version { get; set; }
+    [JsonPropertyName("session_id")] public string SessionId { get; set; }
+    [JsonPropertyName("user")] public OpCodeReadyEventUser User { get; set; }
+    [JsonPropertyName("shard")] public List<int> Shard { get; set; }
 
     public class OpCodeReadyEventUser
     {

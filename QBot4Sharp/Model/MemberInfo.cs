@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+#pragma warning disable CS0108, CS0114
+
 #pragma warning disable CS8618
 
 namespace QBot4Sharp.Model;
