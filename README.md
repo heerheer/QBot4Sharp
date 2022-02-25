@@ -6,9 +6,10 @@ A QBot SDK for .Net Developer
 
 ## 关于
 
-感谢腾讯开放频道API!!!
+感谢QQ频道开放机器人API!!!
 
-终于可以合理使用机器人了!!!呜呜呜!!!
+- [频道Bot官方开发文档](https://bot.q.qq.com/wiki)
+- [频道Bot开放平台](https://bot.q.qq.com/open/)
 
 ## 如何使用
 
