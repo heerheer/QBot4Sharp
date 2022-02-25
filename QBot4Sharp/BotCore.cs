@@ -376,7 +376,7 @@ public class BotCore
     /// Release模式下不会输出
     /// </summary>
     /// <param name="obj"></param>
-    public static void DebugLog(object obj)
+    public static void DebugLog(object? obj)
     {
         if (_debug)
         {

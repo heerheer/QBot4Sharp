@@ -54,7 +54,7 @@ namespace QBot4Sharp.Utils
             }
         }
 
-        public static Task<Stream> GetWithAuthAsync(string url, string auth)
+        public static Task<Stream> GetStreamWithAuthAsync(string url, string auth)
         {
             using (var client = new HttpClient())
             {
@@ -65,7 +65,19 @@ namespace QBot4Sharp.Utils
             }
         }
 
-        public async static Task<OpenApiResult> PostWithAuthAsync(string url, string json, string auth)
+        public static async Task<OpenApiResult> GetWithAuthAsync(string url, string auth)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", auth);
+                var resp = await client.GetAsync(url);
+
+                return new(await resp.Content.ReadAsStringAsync(),
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault());
+            }
+        }
+
+        public static async Task<OpenApiResult> PostWithAuthAsync(string url, string json, string auth)
         {
             using (var client = new HttpClient())
             {

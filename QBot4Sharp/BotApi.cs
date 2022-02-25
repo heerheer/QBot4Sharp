@@ -40,6 +40,15 @@ namespace QBot4Sharp
             return JsonSerializer.Deserialize<UserInfo>(HttpUtil.GetWithAuth(urlBase + $"/user/@me", GetAuthCode()));
         }
 
+        /// <summary>
+        /// 用于异步获取当前用户（机器人）详情。
+        /// </summary>
+        /// <returns></returns>
+        public async Task<BotApiResult<UserInfo>?> GetMeAsync()
+        {
+            var res = await HttpUtil.GetWithAuthAsync(urlBase + $"/user/@me", GetAuthCode());
+            return new(res.TraceId, JsonSerializer.Deserialize<UserInfo>(res.RespJson));
+        }
 
         /// <summary>
         /// 向子频道发送消息
@@ -54,6 +63,11 @@ namespace QBot4Sharp
             return JsonSerializer.Deserialize<QBotMessage>(msgStr);
         }
 
+        /// <summary>
+        /// 异步向子频道发送消息
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="msgToSend"></param>
         public async Task<BotApiResult<QBotMessage>?> SendMessageAsync(string channelId, QBotMessageSend msgToSend)
         {
             var res = await HttpUtil.PostWithAuthAsync(urlBase + $"/channels/{channelId}/messages",
@@ -97,6 +111,16 @@ namespace QBot4Sharp
             return JsonSerializer.Deserialize<GuildInfo>(json);
         }
 
+        public async Task<BotApiResult<GuildInfo>?> GetGuildInfoAsync(string guildId)
+        {
+            var url = urlBase + $"/guilds/{guildId}";
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            BotCore.DebugLog("获取GuildInfo");
+            BotCore.DebugLog(res.RespJson);
+            BotCore.DebugLog(res.TraceId);
+            return new(res.TraceId, JsonSerializer.Deserialize<GuildInfo>(res.RespJson));
+        }
+
         /// <summary>
         /// 获取指定成员的信息
         /// </summary>
@@ -109,6 +133,21 @@ namespace QBot4Sharp
             var json = HttpUtil.GetWithAuth(url, GetAuthCode());
             return JsonSerializer.Deserialize<MemberInfo>(json);
         }
+
+
+        /// <summary>
+        /// 异步获取指定成员的信息
+        /// </summary>
+        /// <param name="guildId"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
+        public async Task<BotApiResult<MemberInfo>> GetMemberInfoAsync(string guildId, string userId)
+        {
+            var url = urlBase + $"/guilds/{guildId}/members/{userId}";
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            return new(res.TraceId, JsonSerializer.Deserialize<MemberInfo>(res.RespJson));
+        }
+
 
         /// <summary>
         /// 获取子频道的信息
@@ -123,15 +162,28 @@ namespace QBot4Sharp
         }
 
         /// <summary>
+        /// 异步获取子频道的信息
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <returns></returns>
+        public async Task<BotApiResult<ChannelInfo>?> GetChannelInfoAsync(string channelId)
+        {
+            var url = urlBase + $"/channels/{channelId}";
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            return new(res.TraceId, JsonSerializer.Deserialize<ChannelInfo>(res.RespJson));
+        }
+
+        /// <summary>
         /// 获取频道中子频道列表
         /// </summary>
         /// <param name="guildId"></param>
         /// <returns></returns>
-        public List<ChannelInfo> GetChannelList(string guildId)
+        public async Task<BotApiResult<List<ChannelInfo>>?> GetChannelList(string guildId)
         {
             var url = urlBase + $"/guilds/{guildId}/channels";
-            var json = HttpUtil.GetWithAuth(url, GetAuthCode());
-            return JsonSerializer.Deserialize<List<ChannelInfo>>(json) ?? new();
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+
+            return new(res.TraceId, JsonSerializer.Deserialize<List<ChannelInfo>>(res.RespJson));
         }
 
         /// <summary>
@@ -144,6 +196,10 @@ namespace QBot4Sharp
         }
 
 
+        /// <summary>
+        /// 异步获取自己的频道列表
+        /// </summary>
+        /// <returns></returns>
         private async Task<List<GuildInfo>> GetGuildListAsync(string before = "", string after = "", int limit = 100)
         {
             var url = urlBase + $"/users/@me/guilds?" +
@@ -151,7 +207,7 @@ namespace QBot4Sharp
                       $"{(after != "" ? "after=" + after + "&" : "")}" +
                       $"limit={limit}";
 
-            var json = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var json = await HttpUtil.GetStreamWithAuthAsync(url, GetAuthCode());
             return await JsonSerializer.DeserializeAsync<List<GuildInfo>>(json) ?? new();
         }
 
@@ -242,7 +298,7 @@ namespace QBot4Sharp
             //GET /guilds/{guild_id}/api_permission
             var url = urlBase + $"/guilds/{guildId}/api_permission";
 
-            var jsonStream = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var jsonStream = await HttpUtil.GetStreamWithAuthAsync(url, GetAuthCode());
             //var t = new { apis = new List<ApiPermission>() };
             var data = await JsonSerializer.DeserializeAsync<GetGuildPermissionsObj>(jsonStream);
             return data?.apis;
