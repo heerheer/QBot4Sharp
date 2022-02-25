@@ -19,7 +19,7 @@ namespace QBot4Sharp.Model.Messages
         [JsonPropertyName("ark")]
         public MessageArk ArkMessage { get; set; }
 
-        [JsonPropertyName("embed")] public QBotMessageEmbed EmbedMessage { get; set; }
+        [JsonPropertyName("embed")] public MessageEmbed EmbedMessage { get; set; }
 
         public override string ToString()
         {

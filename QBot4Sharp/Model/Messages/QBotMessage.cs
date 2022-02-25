@@ -30,29 +30,6 @@ namespace QBot4Sharp.Model.Messages
             public List<string> Roles { get; set; }
         }
 
-        /// <summary>
-        /// 消息创建者
-        /// </summary>
-        [JsonPropertyName("author")]
-        public UserInfo AuthorInfo { get; set; }
-
-        /// <summary>
-        /// 子频道ID
-        /// </summary>
-        [JsonPropertyName("channel_id")]
-        public string ChannelId { get; set; }
-
-        /// <summary>
-        /// 消息内容
-        /// </summary>
-        [JsonPropertyName("content")]
-        public string Content { get; set; }
-
-        /// <summary>
-        /// 频道 id
-        /// </summary>
-        [JsonPropertyName("guild_id")]
-        public string GuildId { get; set; }
 
         /// <summary>
         /// 消息 id
@@ -61,11 +38,22 @@ namespace QBot4Sharp.Model.Messages
         public string MsgId { get; set; }
 
         /// <summary>
-        /// 消息创建者的member信息
+        /// 子频道ID
         /// </summary>
-        /// <returns></returns>
-        [JsonPropertyName("member")]
-        public Member MemberInfo { get; set; }
+        [JsonPropertyName("channel_id")]
+        public string ChannelId { get; set; }
+
+        /// <summary>
+        /// 频道 id
+        /// </summary>
+        [JsonPropertyName("guild_id")]
+        public string GuildId { get; set; }
+
+        /// <summary>
+        /// 消息内容
+        /// </summary>
+        [JsonPropertyName("content")]
+        public string Content { get; set; }
 
         /// <summary>
         /// 消息时间戳
@@ -74,16 +62,78 @@ namespace QBot4Sharp.Model.Messages
         public DateTime Timestamp { get; set; }
 
         /// <summary>
+        /// 消息编辑时间
+        /// </summary>
+        [JsonPropertyName("edited_timestamp")]
+        public DateTime EditTime { get; set; }
+
+        /// <summary>
         /// 是否是@全员消息
         /// </summary>
         [JsonPropertyName("mention_everyone")]
         public bool IsMentionEveryone { get; set; }
 
         /// <summary>
-        /// 消息编辑时间
+        /// 消息创建者
         /// </summary>
-        [JsonPropertyName("edited_timestamp")]
-        public DateTime EditTime { get; set; }
+        [JsonPropertyName("author")]
+        public UserInfo AuthorInfo { get; set; }
+
+
+        /// <summary>
+        /// 附件
+        /// </summary>
+        [JsonPropertyName("attachments")]
+        public List<MessageAttachment> Attachments { get; set; }
+
+        /// <summary>
+        /// embeds
+        /// </summary>
+        [JsonPropertyName("embeds")]
+        public List<MessageEmbed> Embeds { get; set; }
+
+
+        /// <summary>
+        /// 消息创建者的member信息
+        /// </summary>
+        /// <returns></returns>
+        [JsonPropertyName("mentions")]
+        public List<UserInfo> Mentions { get; set; }
+
+        /// <summary>
+        /// 消息创建者的member信息
+        /// </summary>
+        /// <returns></returns>
+        [JsonPropertyName("member")]
+        public Member MemberInfo { get; set; }
+
+
+        /// <summary>
+        /// ark消息
+        /// </summary>
+        [JsonPropertyName("ark")]
+        public MessageArk Ark { get; set; }
+
+
+        /// <summary>
+        /// 用于消息间的排序，seq 在同一子频道中按从先到后的顺序递增，不同的子频道之前消息无法排序。(目前只在消息事件中有值，后续废弃)
+        /// </summary>
+        [JsonPropertyName("seq")]
+        public int Seq { get; set; }
+
+        /// <summary>
+        /// 子频道消息 seq，用于消息间的排序，seq 在同一子频道中按从先到后的顺序递增，不同的子频道之前消息无法排序
+        /// </summary>
+        [JsonPropertyName("seq_in_channel")]
+        public string SeqInChannel { get; set; }
+
+
+        /// <summary>
+        /// 内嵌键盘, 仅markdown消息支持该字段
+        /// </summary>
+        [JsonPropertyName("keyboard")]
+        public MessageKeyboard Keyboard { get; set; }
+
 
         /// <summary>
         /// 创建一个基础的文本型回复消息
@@ -106,8 +156,8 @@ namespace QBot4Sharp.Model.Messages
         public QBotMessageSend CreateReplyMessage(string title, string prompt, string content, string thumbnailUrl = "")
         {
             var a = QBotMessageSend.CreateReplyMsg(MsgId, "");
-            a.EmbedMessage = new QBotMessageEmbed(title, prompt);
-            a.EmbedMessage.Field = new List<QBotMessageEmbed.MessageEmbedField> { new(content) };
+            a.EmbedMessage = new MessageEmbed(title, prompt);
+            a.EmbedMessage.Field = new List<MessageEmbed.MessageEmbedField> { new(content) };
             return a;
         }
 
@@ -149,5 +199,14 @@ namespace QBot4Sharp.Model.Messages
                 .Trim();
             return c.TrimStart('/').Trim();
         }
+    }
+
+    public class MessageAttachment
+    {
+        /// <summary>
+        /// 下载地址
+        /// </summary>
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
     }
 }

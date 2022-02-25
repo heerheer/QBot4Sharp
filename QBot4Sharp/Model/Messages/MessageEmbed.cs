@@ -2,9 +2,9 @@
 
 namespace QBot4Sharp.Model.Messages;
 
-public class QBotMessageEmbed
+public class MessageEmbed
 {
-    public QBotMessageEmbed(string title, string prompt)
+    public MessageEmbed(string title, string prompt)
     {
         Title = title;
         Prompt = prompt;
