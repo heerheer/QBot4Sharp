@@ -44,6 +44,7 @@ namespace QBot4Sharp
         /// 用于异步获取当前用户（机器人）详情。
         /// </summary>
         /// <returns></returns>
+        [Obsolete]
         public async Task<BotApiResult<UserInfo>?> GetMeAsync()
         {
             var res = await HttpUtil.GetWithAuthAsync(urlBase + $"/user/@me", GetAuthCode());
@@ -55,6 +56,7 @@ namespace QBot4Sharp
         /// </summary>
         /// <param name="channelId"></param>
         /// <param name="msgToSend"></param>
+        [Obsolete]
         public QBotMessage? SendMessage(string channelId, QBotMessageSend msgToSend)
         {
             var msgStr = HttpUtil.PostWithAuth(urlBase + $"/channels/{channelId}/messages", msgToSend.ToString(),
@@ -102,6 +104,7 @@ namespace QBot4Sharp
         /// </summary>
         /// <param name="guildId"></param>
         /// <returns></returns>
+        [Obsolete]
         public GuildInfo? GetGuildInfo(string guildId)
         {
             var url = urlBase + $"/guilds/{guildId}";
@@ -127,6 +130,7 @@ namespace QBot4Sharp
         /// <param name="guildId"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
+        [Obsolete]
         public MemberInfo? GetMemberInfo(string guildId, string userId)
         {
             var url = urlBase + $"/guilds/{guildId}/members/{userId}";
@@ -154,6 +158,7 @@ namespace QBot4Sharp
         /// </summary>
         /// <param name="channelId"></param>
         /// <returns></returns>
+        [Obsolete]
         public ChannelInfo? GetChannelInfo(string channelId)
         {
             var url = urlBase + $"/channels/{channelId}";
@@ -184,15 +189,6 @@ namespace QBot4Sharp
             var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
 
             return new(res.TraceId, JsonSerializer.Deserialize<List<ChannelInfo>>(res.RespJson));
-        }
-
-        /// <summary>
-        /// 获取自己的频道列表
-        /// </summary>
-        /// <returns></returns>
-        public List<GuildInfo> GetGuildList(string before = "", string after = "", int limit = 100)
-        {
-            return GetGuildListAsync(before, after, limit).Result;
         }
 
 
@@ -293,15 +289,14 @@ namespace QBot4Sharp
         /// </summary>
         /// <param name="guildId"></param>
         /// <returns></returns>
-        public async Task<List<ApiPermission>?> GetGuildPermissions(string guildId)
+        public async Task<BotApiResult<List<ApiPermission>>?> GetGuildApiPermissionsAsync(string guildId)
         {
             //GET /guilds/{guild_id}/api_permission
             var url = urlBase + $"/guilds/{guildId}/api_permission";
 
-            var jsonStream = await HttpUtil.GetStreamWithAuthAsync(url, GetAuthCode());
-            //var t = new { apis = new List<ApiPermission>() };
-            var data = await JsonSerializer.DeserializeAsync<GetGuildPermissionsObj>(jsonStream);
-            return data?.apis;
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var data = JsonSerializer.Deserialize<GetGuildPermissionsObj>(res.RespJson) ?? new GetGuildPermissionsObj();
+            return new(res.TraceId, data.apis);
         }
 
         /// <summary>
@@ -315,7 +310,7 @@ namespace QBot4Sharp
 
         class GetGuildPermissionsObj
         {
-            public List<ApiPermission>? apis { get; set; }
+            public List<ApiPermission>? apis { get; set; } = new();
         }
     }
 }
