@@ -186,7 +186,8 @@ namespace QBot4Sharp.Model.Messages
         }
 
         /// <summary>
-        /// 获取去掉@开头后的文本 
+        /// 获取去掉 @BotId 后的文本
+        /// 推荐先Me一下
         /// </summary>
         /// <returns></returns>
         public string GetMessage(string botId)

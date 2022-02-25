@@ -14,7 +14,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.1.1`
+`Install-Package QBot4Sharp -Version 1.1.2.3
 
 ### 2. 创建入口代码
 
@@ -93,6 +93,13 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 ```
 
 ## 更新历史
+
+### v1.1.2.2
+
+1. 修改MemberInfoWithGuildId类
+2. 同步Message对象与文档字段。
+3. BotApi类中方法改为Async异步调用，同时可以获取TraceId。（有异步方法的同步API已弃用）
+4. 下个版本:1.1.3 将增加频道身份组相关API封装。
 
 ### v1.1.2.2
 
