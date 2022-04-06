@@ -11,6 +11,7 @@
         <Description>A QBot SDK for .Net Developer</Description>
         <PackageProjectUrl>https://github.com/heerheer/QBot4Sharp</PackageProjectUrl>
         <RepositoryUrl>https://github.com/heerheer/QBot4Sharp</RepositoryUrl>
+        <PackageIconUrl>https://github.com/heerheer/QBot4Sharp/raw/master/logo.png</PackageIconUrl>
     </PropertyGroup>
 
     <ItemGroup>
