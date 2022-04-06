@@ -161,7 +161,3 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 6. 增加了注释，减少了期末考试的复习时间。（土木工程施工为什么感觉好多。）
 7. 现在似乎可以在SDK里面发现一只不会赛马的小马！
 
-## 交流
-
-![](https://bbs.cf-lol.com/template/wic_random/static/logo.png)
-访问[插件船坞](https://bbs.cf-lol.com)论坛，随时发现更多应用。
