@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -9,7 +10,7 @@ namespace QBot4Sharp.Utils
 {
     public class HttpUtil
     {
-        public record OpenApiResult(string RespJson, string? TraceId);
+        public record OpenApiResult(string RespJson, string? TraceId, HttpStatusCode? HttpStatus);
 
         public static void Post(string url, string json)
         {
@@ -73,7 +74,7 @@ namespace QBot4Sharp.Utils
                 var resp = await client.GetAsync(url);
 
                 return new(await resp.Content.ReadAsStringAsync(),
-                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault());
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault(), resp.StatusCode);
             }
         }
 
@@ -89,7 +90,35 @@ namespace QBot4Sharp.Utils
 
                 //BotCore.DebugLog(resp.Result);
                 return new(await resp.Content.ReadAsStringAsync(),
-                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault());
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault(), resp.StatusCode);
+            }
+        }
+
+        public static async Task<OpenApiResult> PutWithAuthAsync(string url, string json, string auth)
+        {
+            using (var client = new HttpClient())
+            {
+                var c = new StringContent(json, Encoding.UTF8, "application/json");
+                client.DefaultRequestHeaders.Add("Authorization", auth);
+
+                var resp = await client.PutAsync(url, c);
+
+
+                //BotCore.DebugLog(resp.Result);
+                return new(await resp.Content.ReadAsStringAsync(),
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault(), resp.StatusCode);
+            }
+        }
+
+        public static async Task<OpenApiResult> DeleteWithAuthAsync(string url, string auth)
+        {
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Add("Authorization", auth);
+                var resp = await client.DeleteAsync(url);
+                //BotCore.DebugLog(resp.Result);
+                return new(await resp.Content.ReadAsStringAsync(),
+                    resp.Headers.GetValues("X-Tps-trace-ID").ToArray().FirstOrDefault(), resp.StatusCode);
             }
         }
     }

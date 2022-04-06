@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Text.Json;
 using QBot4Sharp.Model;
 using QBot4Sharp.Model.Messages;
@@ -297,6 +298,46 @@ namespace QBot4Sharp
             var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
             var data = JsonSerializer.Deserialize<GetGuildPermissionsObj>(res.RespJson) ?? new GetGuildPermissionsObj();
             return new(res.TraceId, data.apis);
+        }
+
+
+        /// <summary>
+        /// 用于添加子频道 channel_id 内的精华消息。
+        /// 精华消息在一个子频道内最多只能创建 20 条
+        /// 只有可见的消息才能被设置为精华消息
+        /// 接口返回对象中 message_ids 为当前请求后子频道内所有精华消息 message_id 数组
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        public async Task<BotApiResult<PinsMessage>> AddPinsMessage(string channelId, string messageId)
+        {
+            var url = urlBase + $"/channels/{channelId}/pins/{messageId}";
+            var res = await HttpUtil.PutWithAuthAsync(url, "", GetAuthCode());
+            var data = JsonSerializer.Deserialize<PinsMessage>(res.RespJson);
+            return new(res.TraceId, data);
+        }
+
+        /// <summary>
+        /// 用于删除子频道 channel_id 下指定 message_id 的精华消息
+        /// 删除子频道内全部精华消息，请将 message_id 设置为 all
+        /// </summary>
+        /// <param name="channelId"></param>
+        /// <param name="messageId">删除子频道内全部精华消息，请将 message_id 设置为 all</param>
+        /// <returns></returns>
+        public async Task<BotApiResult<bool>> DeletePinsMessage(string channelId, string messageId)
+        {
+            var url = urlBase + $"/channels/{channelId}/pins/{messageId}";
+            var res = await HttpUtil.DeleteWithAuthAsync(url, GetAuthCode());
+            return new(res.TraceId, res.HttpStatus == HttpStatusCode.NoContent);
+        }
+
+        public async Task<BotApiResult<PinsMessage>> GetPinsMessageList(string channelId)
+        {
+            var url = urlBase + $"/channels/{channelId}/pins";
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var data = JsonSerializer.Deserialize<PinsMessage>(res.RespJson);
+            return new(res.TraceId, data);
         }
 
         /// <summary>

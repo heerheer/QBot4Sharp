@@ -96,12 +96,16 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 
 ## 更新历史
 
-### v1.1.2.2
+### v1.1.2.4
+
+1. 增加精华消息相关API
+
+### v1.1.2.2(3)
 
 1. 修改MemberInfoWithGuildId类
 2. 同步Message对象与文档字段。
 3. BotApi类中方法改为Async异步调用，同时可以获取TraceId。（有异步方法的同步API已弃用）
-4. 下个版本:1.1.3 将增加频道身份组相关API封装。
+4. 版本:1.1.3 将增加频道身份组相关API封装。
 
 ### v1.1.2.2
 
