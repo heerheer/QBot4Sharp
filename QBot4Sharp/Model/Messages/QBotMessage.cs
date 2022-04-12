@@ -136,6 +136,15 @@ namespace QBot4Sharp.Model.Messages
 
 
         /// <summary>
+        /// 通过消息事件参数创建无任何内容的发送消息对象
+        /// </summary>
+        /// <returns></returns>
+        public QBotMessageSend CreateReplyMessage()
+        {
+            return QBotMessageSend.CreateReplyMsg(MsgId, "");
+        }
+
+        /// <summary>
         /// 创建一个基础的文本型回复消息
         /// </summary>
         /// <param name="content"></param>

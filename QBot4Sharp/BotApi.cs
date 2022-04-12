@@ -77,6 +77,8 @@ namespace QBot4Sharp
                 msgToSend.ToString(),
                 GetAuthCode());
             BotCore.DebugLog(msgToSend.ToString());
+            BotCore.DebugLog($"TraceId:{res.RespJson}");
+
             BotCore.DebugLog($"TraceId:{res.TraceId}");
             return new(res.TraceId, JsonSerializer.Deserialize<QBotMessage>(res.RespJson));
         }
