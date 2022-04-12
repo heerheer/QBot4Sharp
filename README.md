@@ -16,7 +16,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.1.2.4
+`Install-Package QBot4Sharp -Version 1.1.2.5
 
 ### 2. 创建入口代码
 
@@ -95,6 +95,11 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 ```
 
 ## 更新历史
+
+### v1.1.2.5
+
+1. Markdown相关API，与一个方便的构造器。
+2. 给发消息API增加了原始JSON的Debug模式下输出。
 
 ### v1.1.2.4
 
