@@ -129,9 +129,9 @@ namespace QBot4Sharp.Model.Messages
 
 
         /// <summary>
-        /// 内嵌键盘, 仅markdown消息支持该字段
+        /// 引用消息对象
         /// </summary>
-        [JsonPropertyName("keyboard")]
+        [JsonPropertyName("message_reference")]
         public MessageKeyboard Keyboard { get; set; }
 
 
@@ -209,5 +209,20 @@ namespace QBot4Sharp.Model.Messages
         /// </summary>
         [JsonPropertyName("url")]
         public string Url { get; set; }
+    }
+
+    public class MessageReference
+    {
+        /// <summary>
+        /// 需要引用回复的消息 id
+        /// </summary>
+        [JsonPropertyName("message_id")]
+        public string MsgId { get; set; }
+
+        /// <summary>
+        /// 是否忽略获取引用消息详情错误，默认否
+        /// </summary>
+        [JsonPropertyName("ignore_get_message_error")]
+        public bool IgnoreGetMessageError { get; set; }
     }
 }
