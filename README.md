@@ -16,7 +16,7 @@ A QBot SDK for .Net Developer
 
 ### 1. Nuget安装类库
 
-`Install-Package QBot4Sharp -Version 1.1.2.5
+`Install-Package QBot4Sharp -Version 1.1.2.6
 
 ### 2. 创建入口代码
 
@@ -95,6 +95,10 @@ core.AT_MESSAGE_CREATE += (bot, msg) =>
 ```
 
 ## 更新历史
+
+### v1.1.2.6
+
+1.增加GetGuildMessageSetting异步方法。用于获取MessageSetting对象。
 
 ### v1.1.2.5
 

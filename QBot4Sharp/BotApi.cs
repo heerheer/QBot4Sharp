@@ -343,6 +343,21 @@ namespace QBot4Sharp
         }
 
         /// <summary>
+        /// 获取频道消息频率设置
+        /// </summary>
+        /// <param name="guildId"></param>
+        /// <returns></returns>
+        public async Task<BotApiResult<MessageSetting>> GetGuildMessageSetting(string guildId)
+        {
+            //GET /guilds/{guild_id}/message/setting
+            var url = urlBase + $"/guilds/{guildId}/message/setting";
+            var res = await HttpUtil.GetWithAuthAsync(url, GetAuthCode());
+            var data = JsonSerializer.Deserialize<MessageSetting>(res.RespJson);
+            return new(res.TraceId, data);
+        }
+
+
+        /// <summary>
         /// 获取一只小马。
         /// </summary>
         /// <returns>彩蛋？</returns>
