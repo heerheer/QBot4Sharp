@@ -7,69 +7,15 @@ using Websocket.Client;
 
 namespace QBot4Sharp;
 
-public class IntentsConfig
-{
-    /// <summary>
-    /// 频道与子频道相关事件
-    /// <para>机器人被添加进某个频道与删除也会触发</para>
-    /// <para>Link:https://bot.q.qq.com/wiki/develop/api/gateway/guild.html#guild-create</para>
-    /// <para>Link2:https://bot.q.qq.com/wiki/develop/api/gateway/channel.html</para>
-    /// </summary>
-    public bool GuildEvent { get; set; } = false;
-
-    /// <summary>
-    /// 频道与子频道成员相关事件
-    /// <para>Link:https://bot.q.qq.com/wiki/develop/api/gateway/guild_member.html#guild-member-add</para>
-    /// </summary>
-    public bool GuildMemberEvent { get; set; } = false;
-
-    /// <summary>
-    /// 表情表态事件
-    /// </summary>
-    public bool GuildMessageReactionsEvent { get; set; } = false;
-
-    /// <summary>
-    /// 私信事件
-    /// </summary>
-    public bool DirectMessageEvent { get; set; } = false;
-
-    /// <summary>
-    /// 消息审核事件
-    /// </summary>
-    public bool MessageAuditEvent { get; set; } = false;
-
-    /// <summary>
-    /// 帖子与评论事件
-    /// </summary>
-    public bool ForumEvent { get; set; } = false;
-
-    /// <summary>
-    /// 音频事件
-    /// </summary>
-    public bool AudioActionEvent { get; set; } = false;
-
-    /// <summary>
-    /// 当收到@机器人的消息时
-    /// </summary>
-    public bool AtMessagesEvent { get; set; } = false;
-
-    public long Value =>
-        0 | (uint)(GuildEvent ? 1 << 0 : 0) | (uint)(GuildMemberEvent ? 1 << 1 : 0) |
-        (uint)(GuildMessageReactionsEvent ? 1 << 10 : 0)
-        | (uint)(DirectMessageEvent ? 1 << 12 : 0) | (uint)(MessageAuditEvent ? 1 << 27 : 0) |
-        (uint)(ForumEvent ? 1 << 28 : 0)
-        | (uint)(AudioActionEvent ? 1 << 29 : 0) | (uint)(AtMessagesEvent ? 1 << 30 : 0);
-}
-
 public class BotCore
 {
     const string WssUrlSandbox = "wss://sandbox.api.sgroup.qq.com/websocket";
 
     const string WssUrlPublic = "wss://api.sgroup.qq.com/websocket";
 
-    string MyToken;
+    private readonly string _token;
     private static bool _debug;
-    string AppId;
+    private readonly string _appId;
     public int S2d; //保存下行消息得到的index？
     public WebsocketClient WebSocket;
     public int HeartbeatInterval;
@@ -108,19 +54,14 @@ public class BotCore
 
     public delegate void GuildMemberEventHandler(BotCore botCore, MemberInfoWithGildId? message);
 
-    public delegate void DirectMessageHandler(BotCore botCore, QBotMessage? message);
-
 
     /// <summary>
     /// OpCode为0时，服务端进行消息推送事件(未细分)
     /// </summary>
     public event OriginEventHandler? ON_DISPATCH;
 
-    /// <summary>
-    /// 收到AT消息事件。
-    /// </summary>
-    public event MessageEventHandler? AT_MESSAGE_CREATE;
 
+    // ------ GUILDS (1 << 0)
 
     /// <summary>
     /// 当机器人加入新guild时
@@ -153,6 +94,9 @@ public class BotCore
     /// </summary>
     public event GuildEventHandler? CHANNEL_DELETE;
 
+
+    // ------- GUILD_MEMBERS (1 << 1)
+
     /// <summary>
     /// 新用户加入频道
     /// </summary>
@@ -169,7 +113,42 @@ public class BotCore
     public event GuildMemberEventHandler? GUILD_MEMBER_REMOVE;
 
 
-    public event DirectMessageHandler? DIRECT_MESSAGE;
+    // ------ GUILD_MESSAGE_REACTIONS
+
+    //TODO
+    public event EventHandler? MESSAGE_REACTION_ADD;
+
+    public event EventHandler? MESSAGE_REACTION_REMOVE;
+
+
+    // ------ DIRECT_MESSAGE (1 << 12)
+
+    /// <summary>
+    /// 当收到用户发给机器人的私信消息时
+    /// </summary>
+    public event MessageEventHandler? DIRECT_MESSAGE_CREATE;
+
+    /// <summary>
+    /// 删除（撤回）消息事件
+    /// </summary>
+    public event MessageEventHandler? DIRECT_MESSAGE_DELETE;
+
+    // ------ INTERACTION (1 << 12)
+    //TODO
+    public event EventHandler? INTERACTION_CREATE;
+
+
+    // -------PUBLIC_GUILD_MESSAGES (1 << 30) // 消息事件，此为公域的消息事件
+
+    /// <summary>
+    /// 当收到@机器人的消息时
+    /// </summary>
+    public event MessageEventHandler? AT_MESSAGE_CREATE;
+
+    /// <summary>
+    /// 当频道的消息被删除时
+    /// </summary>
+    public event MessageEventHandler? PUBLIC_MESSAGE_DELETE;
 
     #endregion
 
@@ -177,15 +156,15 @@ public class BotCore
     /// 
     /// </summary>
     /// <param name="appId"></param>
-    /// <param name="myToken"></param>
+    /// <param name="token"></param>
     /// <param name="isSandBoxMode">是否是沙箱模式</param>
     /// <param name="debug">是否进行debug输出</param>
-    public BotCore(string appId, string myToken, bool isSandBoxMode = true, bool debug = false)
+    public BotCore(string appId, string token, bool isSandBoxMode = true, bool debug = false)
     {
-        AppId = appId;
-        MyToken = myToken;
+        _appId = appId;
+        _token = token;
         _debug = debug;
-        Api = new BotApi(appId, myToken, isSandBoxMode);
+        Api = new BotApi(appId, token, isSandBoxMode);
 
         var wssUrl = isSandBoxMode ? WssUrlSandbox : WssUrlPublic;
 
@@ -237,9 +216,17 @@ public class BotCore
                     if (eventType == "DIRECT_MESSAGE_CREATE")
                     {
                         //当收到用户发给机器人的私信消息时
-                        DIRECT_MESSAGE?.Invoke(this,
+                        DIRECT_MESSAGE_CREATE?.Invoke(this,
                             JsonSerializer.Deserialize<QBotMessage>(((JsonElement)msgObj.EventContent).ToString()));
                     }
+
+                    if (eventType == "DIRECT_MESSAGE_DELETE")
+                    {
+                        //当收到用户发给机器人的私信消息时
+                        DIRECT_MESSAGE_DELETE?.Invoke(this,
+                            JsonSerializer.Deserialize<QBotMessage>(((JsonElement)msgObj.EventContent).ToString()));
+                    }
+
 
                     //服务端进行消息推送
                     if (eventType == "AT_MESSAGE_CREATE")
@@ -341,7 +328,7 @@ public class BotCore
     }
 
 
-    public void StartHeartbeat()
+    private void StartHeartbeat()
     {
         if (_heartbeatTimer != null)
         {
@@ -362,7 +349,7 @@ public class BotCore
 
     private void SendOpCode2Identify()
     {
-        Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(AppId, MyToken, IntentsConfig.Value)); });
+        Task.Run(() => { WebSocket.Send(BotOpCode.Gen_OpCode_2_Identify_Json(_appId, _token, IntentsConfig.Value)); });
     }
 
     private void TryResume()
@@ -370,7 +357,7 @@ public class BotCore
         if (_session == "")
             return;
         _resuming = true;
-        WebSocket.Send(new ResumeOpCode(MyToken, _session).ToString());
+        WebSocket.Send(new ResumeOpCode(_token, _session).ToString());
     }
 
     /// <summary>
